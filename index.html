@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gerador de Estruturas PEP da AGCGNO</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div class="brand">
+          <div class="logo-slot">
+            <img src="AXIA.png" alt="Axia" />
+          </div>
+          <h1>Gerador de Estruturas PEP da AGCGNO</h1>
+        </div>
+      </header>
+
+      <section class="panel">
+        <h2>1) Dados CAPEX (colar M:AH)</h2>
+        <p class="hint">
+          Cole diretamente o bloco M:AH da planilha CAPEX, sem cabeçalho.
+          O sistema usa: M (Coletor), Q (ID real), R (Descrição), AG (Objeto),
+          AH (Local).
+        </p>
+        <textarea id="paste-sap" placeholder="Cole aqui as colunas do CAPEX (M:AH)"></textarea>
+      </section>
+
+      <section class="panel">
+        <h2>2) Inserir manualmente</h2>
+        <p class="hint">
+          Use quando precisar criar um PEP específico sem colar do CAPEX.
+        </p>
+        <div class="manual-form">
+          <label>Usina
+            <select id="manual-usina">
+              <option value="">Selecione</option>
+              <option value="BALBINA">BALBINA</option>
+              <option value="COARACY NUNES">COARACY NUNES</option>
+              <option value="CURUA-UNA">CURUA-UNA</option>
+              <option value="SAMUEL">SAMUEL</option>
+              <option value="TUCURI">TUCURI</option>
+            </select>
+          </label>
+          <label>Coletor (Carga)
+            <input id="manual-coletor" type="text" placeholder="NGHI.0162.XX" />
+          </label>
+          <label>ID real
+            <input id="manual-idreal" type="text" placeholder="COO.NO26.019" />
+          </label>
+          <label>Descrição
+            <input id="manual-desc" type="text" placeholder="Descrição do projeto" />
+          </label>
+          <label>Objeto
+            <input id="manual-objeto" type="text" placeholder="Objeto do CAPEX" />
+          </label>
+          <button id="btn-add-manual" class="secondary">Adicionar à lista</button>
+        </div>
+      </section>
+
+      <section class="actions">
+        <button id="btn-interpret">Interpretar dados</button>
+      </section>
+
+      <section class="panel">
+        <h2>Revisão (editável)</h2>
+        <div class="tables">
+          <div class="table-block">
+            <h3>Dados CAPEX</h3>
+            <div id="table-projects" class="table-wrap"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="actions">
+        <button id="btn-generate">Gerar PEPs</button>
+      </section>
+
+      <section class="panel">
+        <h2>Pré-visualização</h2>
+        <div id="warnings" class="warnings"></div>
+        <div class="actions">
+          <label class="inline-field">
+            Recalcular usina
+            <select id="recalc-usina">
+              <option value="">Selecione</option>
+              <option value="BALBINA">BALBINA</option>
+              <option value="COARACY NUNES">COARACY NUNES</option>
+              <option value="CURUA-UNA">CURUA-UNA</option>
+              <option value="SAMUEL">SAMUEL</option>
+              <option value="TUCURI">TUCURI</option>
+            </select>
+          </label>
+          <label class="inline-field">
+            Novo início do sequencial
+            <input id="recalc-start" type="number" min="1" value="1" />
+          </label>
+          <button id="btn-recalc" class="secondary">Recalcular sequencial</button>
+        </div>
+        <p class="hint">
+          O novo início redefine apenas o sequencial daquela usina. As demais
+          permanecem iguais.
+        </p>
+        <div id="table-output" class="table-wrap"></div>
+        <div class="actions">
+          <button id="btn-copy">Copiar resultado</button>
+          <button id="btn-download">Baixar Excel</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
