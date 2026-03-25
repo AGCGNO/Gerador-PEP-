@@ -48,7 +48,7 @@ const DATASETS = {
       "ID real",
       "Descrição",
       "Local/Usina",
-      "Objeto",
+      "Objeto/Especificação",
     ],
   },
 };
@@ -70,6 +70,26 @@ function resolveUsinaKey(raw) {
   if (found) return found;
   if (key.includes("TUCURUI")) return "TUCURI";
   return found || "";
+}
+
+function detectColumns(headerRow) {
+  const headers = headerRow.map((h) => normalizeKey(h));
+
+  const find = (aliases) => {
+    for (let i = 0; i < headers.length; i += 1) {
+      const h = headers[i];
+      if (aliases.some((alias) => h.includes(alias))) return i;
+    }
+    return -1;
+  };
+
+  return {
+    coletor: find(["COLETOR", "DEFINICAO", "DEFINIÇÃO", "PEP SIGEP"]),
+    idReal: find(["ID REAL", "ID SIGEP", "ID"]),
+    desc: find(["DESCRICAO", "DESCRIÇÃO", "DENOMINACAO", "DENOMINAÇÃO"]),
+    objeto: find(["OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"]),
+    usina: find(["LOCAL", "USINA", "INSTALACAO", "INSTALAÇÃO"]),
+  };
 }
 
 function displayUsina(usinaKey) {
@@ -400,19 +420,29 @@ function renderOutputTable(rows) {
 
 btnInterpret.addEventListener("click", () => {
   const sapRows = parseTsvAny(sapTextarea.value);
-  const coletorIdx = 0; // M
-  const idRealIdx = 4; // Q
-  const descIdx = 5; // R
-  const objetoIdx = 20; // AG
-  const localIdx = 21; // AH
+  if (!sapRows.length) return;
+  const header = sapRows[0];
+  const data = sapRows.slice(1);
+  const cols = detectColumns(header);
+  const missing = [];
+  if (cols.coletor === -1) missing.push("Coletor");
+  if (cols.idReal === -1) missing.push("ID real");
+  if (cols.desc === -1) missing.push("Descrição");
+  if (cols.usina === -1) missing.push("Usina/Local");
+  if (missing.length) {
+    warningsBox.textContent =
+      "Colunas não identificadas: " + missing.join(", ");
+  } else {
+    warningsBox.textContent = "";
+  }
 
-  const projectRows = sapRows
+  const projectRows = data
     .map((row) => [
-      row[coletorIdx] || "",
-      row[idRealIdx] || "",
-      row[descIdx] || "",
-      row[localIdx] || "",
-      row[objetoIdx] || "",
+      cols.coletor >= 0 ? row[cols.coletor] || "" : "",
+      cols.idReal >= 0 ? row[cols.idReal] || "" : "",
+      cols.desc >= 0 ? row[cols.desc] || "" : "",
+      cols.usina >= 0 ? row[cols.usina] || "" : "",
+      cols.objeto >= 0 ? row[cols.objeto] || "" : "",
     ])
     .filter((row) => {
       if (!row.some((cell) => cell && cell.trim())) return false;
