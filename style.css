@@ -32,6 +32,28 @@ body {
   padding: 32px 20px 60px;
 }
 
+.nav {
+  display: flex;
+  gap: 12px;
+  margin: 18px 0 10px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--accent-dark);
+  background: #ffffff;
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.nav a.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+
 .hero {
   padding: 22px 24px;
   background: linear-gradient(120deg, var(--accent), var(--accent-dark));
@@ -251,6 +273,10 @@ td[contenteditable="true"] {
   margin-bottom: 10px;
   color: var(--accent-dark);
   font-weight: 600;
+}
+
+.row-highlight td {
+  background: rgba(0, 0, 255, 0.08);
 }
 
 @media (max-width: 700px) {

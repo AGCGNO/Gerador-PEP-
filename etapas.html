@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Construção de Etapas</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div class="brand">
+          <div class="logo-slot">
+            <img src="AXIA.png" alt="Axia" />
+          </div>
+          <h1>Construção de Etapas</h1>
+        </div>
+      </header>
+
+      <nav class="nav">
+        <a href="index.html">PEPs</a>
+        <a class="active" href="etapas.html">Etapas</a>
+      </nav>
+
+      <section class="panel">
+        <h2>Planilha de Projetos (com cabeçalho)</h2>
+        <p class="hint">
+          Cole a planilha com cabeçalho. O sistema identifica automaticamente:
+          ID Projeto, Descrição, FIM PREVISTO, meses (jan/26, fev/26, ...),
+          e total 2026-2030.
+        </p>
+        <textarea id="paste-etapas" placeholder="Cole aqui sua planilha com cabeçalho"></textarea>
+      </section>
+
+      <section class="actions">
+        <button id="btn-preview-etapas">Gerar Pré-visualização</button>
+      </section>
+
+      <section class="panel">
+        <h2>Pré-visualização</h2>
+        <div id="warnings-etapas" class="warnings"></div>
+        <div class="manual-form">
+          <label>Filtrar por ID
+            <select id="filter-id">
+              <option value="">Todos</option>
+            </select>
+          </label>
+        </div>
+        <div class="manual-form">
+          <label>Ajuste valor total (R$)
+            <input id="adjust-total" type="text" placeholder="1500000" />
+          </label>
+          <label>Ajuste contratação (dias antes do 1º fornecimento)
+            <input id="adjust-contrato" type="number" value="180" />
+          </label>
+          <label>Ajuste emissão RC (dias antes da aprovação)
+            <input id="adjust-emissao" type="number" value="15" />
+          </label>
+          <label>Ajuste termo (dias antes da emissão)
+            <input id="adjust-termo" type="number" value="30" />
+          </label>
+          <label>Ajuste fornecimento (deslocamento em dias)
+            <input id="adjust-fornec" type="number" value="0" />
+          </label>
+          <label>Ajuste conclusão (dias)
+            <input id="adjust-concl" type="number" value="0" />
+          </label>
+          <label>Ajuste encerramento (dias)
+            <input id="adjust-enc" type="number" value="0" />
+          </label>
+          <button id="btn-apply-adjust" class="secondary">Aplicar ajuste</button>
+        </div>
+        <p class="hint">
+          Ajusta apenas Conclusão do Projeto e Encerramento Técnico PEP.
+        </p>
+        <div id="table-etapas" class="table-wrap"></div>
+        <div class="actions">
+          <button id="btn-copy-etapas">Copiar resultado</button>
+          <button id="btn-download-etapas">Baixar Excel</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="etapas.js"></script>
+  </body>
+</html>

@@ -1,15 +1,14 @@
 const sapTextarea = document.getElementById("paste-sap");
 
-const tableProjects = document.getElementById("table-projects");
 const tableOutput = document.getElementById("table-output");
 const warningsBox = document.getElementById("warnings");
 
-const btnInterpret = document.getElementById("btn-interpret");
 const btnGenerate = document.getElementById("btn-generate");
 const btnCopy = document.getElementById("btn-copy");
 const btnDownload = document.getElementById("btn-download");
 const btnRecalc = document.getElementById("btn-recalc");
 const btnAddManual = document.getElementById("btn-add-manual");
+const filterPep = document.getElementById("filter-pep");
 
 const recalcUsina = document.getElementById("recalc-usina");
 const recalcStart = document.getElementById("recalc-start");
@@ -18,6 +17,7 @@ const manualColetor = document.getElementById("manual-coletor");
 const manualIdReal = document.getElementById("manual-idreal");
 const manualDesc = document.getElementById("manual-desc");
 const manualObjeto = document.getElementById("manual-objeto");
+let manualRows = [];
 
 // Mapeamento obrigatório por usina.
 const USINAS = {
@@ -384,7 +384,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
   return output;
 }
 
-function renderOutputTable(rows) {
+function renderOutputTable(rows, highlightBase = "") {
   if (!rows.length) {
     tableOutput.innerHTML = "<p class='hint'>Nada para exibir.</p>";
     return;
@@ -404,6 +404,9 @@ function renderOutputTable(rows) {
   const tbody = document.createElement("tbody");
   rows.forEach((row) => {
     const tr = document.createElement("tr");
+    if (highlightBase && row[2]?.startsWith(highlightBase)) {
+      tr.classList.add("row-highlight");
+    }
     row.forEach((cell) => {
       const td = document.createElement("td");
       td.textContent = cell;
@@ -418,47 +421,47 @@ function renderOutputTable(rows) {
   tableOutput.appendChild(table);
 }
 
-btnInterpret.addEventListener("click", () => {
+btnGenerate.addEventListener("click", () => {
   const sapRows = parseTsvAny(sapTextarea.value);
-  if (!sapRows.length) return;
-  const header = sapRows[0];
-  const data = sapRows.slice(1);
-  const cols = detectColumns(header);
-  const missing = [];
-  if (cols.coletor === -1) missing.push("Coletor");
-  if (cols.idReal === -1) missing.push("ID real");
-  if (cols.desc === -1) missing.push("Descrição");
-  if (cols.usina === -1) missing.push("Usina/Local");
-  if (missing.length) {
-    warningsBox.textContent =
-      "Colunas não identificadas: " + missing.join(", ");
-  } else {
-    warningsBox.textContent = "";
+  if (!sapRows.length && manualRows.length === 0) return;
+  let projectRows = [];
+  if (sapRows.length) {
+    const header = sapRows[0];
+    const data = sapRows.slice(1);
+    const cols = detectColumns(header);
+    const missing = [];
+    if (cols.coletor === -1) missing.push("Coletor");
+    if (cols.idReal === -1) missing.push("ID real");
+    if (cols.desc === -1) missing.push("Descrição");
+    if (cols.usina === -1) missing.push("Usina/Local");
+    if (missing.length) {
+      warningsBox.textContent =
+        "Colunas não identificadas: " + missing.join(", ");
+    } else {
+      warningsBox.textContent = "";
+    }
+    projectRows = data
+      .map((row) => [
+        cols.coletor >= 0 ? row[cols.coletor] || "" : "",
+        cols.idReal >= 0 ? row[cols.idReal] || "" : "",
+        cols.desc >= 0 ? row[cols.desc] || "" : "",
+        cols.usina >= 0 ? row[cols.usina] || "" : "",
+        cols.objeto >= 0 ? row[cols.objeto] || "" : "",
+      ])
+      .filter((row) => {
+        if (!row.some((cell) => cell && cell.trim())) return false;
+        if (!row[0] || !row[0].trim()) return false;
+        return true;
+      });
   }
 
-  const projectRows = data
-    .map((row) => [
-      cols.coletor >= 0 ? row[cols.coletor] || "" : "",
-      cols.idReal >= 0 ? row[cols.idReal] || "" : "",
-      cols.desc >= 0 ? row[cols.desc] || "" : "",
-      cols.usina >= 0 ? row[cols.usina] || "" : "",
-      cols.objeto >= 0 ? row[cols.objeto] || "" : "",
-    ])
-    .filter((row) => {
-      if (!row.some((cell) => cell && cell.trim())) return false;
-      if (!row[0] || !row[0].trim()) return false;
-      return true;
-    });
-
-  renderTable(tableProjects, DATASETS.projects.headers, projectRows);
-});
-
-btnGenerate.addEventListener("click", () => {
-  const projectRows = readTable(tableProjects, DATASETS.projects.cols);
+  projectRows = [...projectRows, ...manualRows];
   const { output, warnings, projectsMeta } = buildOutput(projectRows);
   warningsBox.textContent = warnings.length ? warnings.join(" ") : "";
+  window.__pepOutput = output;
   renderOutputTable(output);
   window.__pepMeta = projectsMeta;
+  populatePepFilter(output);
 });
 
 btnRecalc.addEventListener("click", () => {
@@ -480,7 +483,8 @@ btnRecalc.addEventListener("click", () => {
     if (aMatch !== bMatch) return aMatch - bMatch;
     return 0;
   });
-  renderOutputTable(sorted);
+  window.__pepOutput = sorted;
+  renderOutputTable(sorted, filterPep.value);
 });
 
 recalcUsina.addEventListener("change", () => {
@@ -494,7 +498,8 @@ recalcUsina.addEventListener("change", () => {
     if (aMatch !== bMatch) return aMatch - bMatch;
     return 0;
   });
-  renderOutputTable(sorted);
+  window.__pepOutput = sorted;
+  renderOutputTable(sorted, filterPep.value);
 });
 
 
@@ -507,9 +512,7 @@ btnAddManual.addEventListener("click", () => {
     manualObjeto.value.trim(),
   ];
   if (!row[0] || !row[3]) return;
-  const current = readTable(tableProjects, DATASETS.projects.cols);
-  current.push(row);
-  renderTable(tableProjects, DATASETS.projects.headers, current);
+  manualRows.push(row);
   manualColetor.value = "";
   manualIdReal.value = "";
   manualDesc.value = "";
@@ -547,5 +550,31 @@ btnDownload.addEventListener("click", () => {
   XLSX.writeFile(workbook, "peps.xlsx");
 });
 
-renderTable(tableProjects, DATASETS.projects.headers, []);
 renderOutputTable([]);
+
+function populatePepFilter(rows) {
+  const set = new Set(
+    rows.filter((r) => r[1] === "2").map((r) => r[2]).filter(Boolean)
+  );
+  filterPep.innerHTML = '<option value="">Todos</option>';
+  Array.from(set)
+    .sort()
+    .forEach((pep) => {
+      const opt = document.createElement("option");
+      opt.value = pep;
+      opt.textContent = pep;
+      filterPep.appendChild(opt);
+    });
+}
+
+filterPep.addEventListener("change", () => {
+  if (!window.__pepOutput) return;
+  const base = filterPep.value;
+  if (!base) {
+    renderOutputTable(window.__pepOutput);
+    return;
+  }
+  const selected = window.__pepOutput.filter((r) => r[2]?.startsWith(base));
+  const rest = window.__pepOutput.filter((r) => !r[2]?.startsWith(base));
+  renderOutputTable([...selected, ...rest], base);
+});
