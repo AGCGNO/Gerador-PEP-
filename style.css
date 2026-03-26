@@ -89,6 +89,33 @@ body {
   font-size: 0.9rem;
 }
 
+.fornec-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fornec-list input {
+  width: 140px;
+}
+
+#btn-add-fornec {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.fornec-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#btn-add-fornec {
+  align-self: center;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
 .brand {
   display: flex;
   align-items: center;

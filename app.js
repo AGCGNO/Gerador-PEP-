@@ -1,6 +1,5 @@
 const sapTextarea = document.getElementById("paste-sap");
 const fileCapex = document.getElementById("file-capex");
-const btnLoadCapex = document.getElementById("btn-load-capex");
 
 const tableOutput = document.getElementById("table-output");
 const warningsBox = document.getElementById("warnings");
@@ -92,6 +91,25 @@ function detectColumns(headerRow) {
     objeto: find(["OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"]),
     usina: find(["LOCAL", "USINA", "INSTALACAO", "INSTALAÇÃO"]),
   };
+}
+
+function findHeaderIndex(rows) {
+  for (let i = 0; i < rows.length; i += 1) {
+    const cols = detectColumns(rows[i] || []);
+    const hits = [cols.coletor, cols.idReal, cols.desc, cols.usina].filter(
+      (v) => v !== -1
+    ).length;
+    if (hits >= 3) {
+      // Confirma se há dados válidos abaixo do cabeçalho
+      const sample = rows.slice(i + 1, i + 20);
+      const hasData = sample.some((r) => {
+        const coletor = cols.coletor >= 0 ? (r[cols.coletor] || "") : "";
+        return /NGHI|COO/i.test(coletor);
+      });
+      if (hasData) return i;
+    }
+  }
+  return -1;
 }
 
 function displayUsina(usinaKey) {
@@ -428,8 +446,13 @@ btnGenerate.addEventListener("click", () => {
   if (!sapRows.length && manualRows.length === 0) return;
   let projectRows = [];
   if (sapRows.length) {
-    const header = sapRows[0];
-    const data = sapRows.slice(1);
+    const headerIndex = findHeaderIndex(sapRows);
+    if (headerIndex === -1) {
+      warningsBox.textContent = "Cabeçalho não encontrado.";
+      return;
+    }
+    const header = sapRows[headerIndex];
+    const data = sapRows.slice(headerIndex + 1);
     const cols = detectColumns(header);
     const missing = [];
     if (cols.coletor === -1) missing.push("Coletor");
@@ -585,14 +608,27 @@ function aoaToTsv(data) {
   return data.map((row) => row.join("\t")).join("\n");
 }
 
-btnLoadCapex.addEventListener("click", async () => {
+fileCapex.addEventListener("change", async () => {
   const file = fileCapex.files?.[0];
   if (!file) return;
-  const buf = await file.arrayBuffer();
-  const wb = XLSX.read(buf, { type: "array" });
-  const sheet = wb.Sheets[wb.SheetNames[0]];
-  const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  const tsv = aoaToTsv(data);
+  let data = [];
+  if (file.name.toLowerCase().endsWith(".csv")) {
+    const text = await file.text();
+    const wb = XLSX.read(text, { type: "string" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  } else {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  }
+  let rows = data;
+  const headerIndex = findHeaderIndex(rows);
+  if (headerIndex !== -1) {
+    rows = rows.slice(headerIndex);
+  }
+  const tsv = aoaToTsv(rows);
   sapTextarea.value = tsv;
   localStorage.setItem("capex_tsv", tsv);
 });

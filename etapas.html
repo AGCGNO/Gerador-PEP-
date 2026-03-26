@@ -30,7 +30,38 @@
           ID Projeto, Descrição, FIM PREVISTO, meses (jan/26, fev/26, ...),
           e total 2026-2030.
         </p>
+        <div class="actions">
+          <input id="file-etapas" type="file" accept=".xlsx,.xls,.csv" />
+        </div>
         <textarea id="paste-etapas" placeholder="Cole aqui sua planilha com cabeçalho"></textarea>
+      </section>
+
+      <section class="panel">
+        <h2>Inserir manualmente</h2>
+        <p class="hint">
+          Use quando não tiver planilha. Informe ID, valor total e meses/anos de
+          fornecimento.
+        </p>
+        <div class="manual-form">
+          <label>ID Projeto
+            <input id="manual-id" type="text" placeholder="COO.NO26.127" />
+          </label>
+          <label>Valor total (R$)
+            <input id="manual-total" type="text" placeholder="1500000" />
+          </label>
+          <label>1º fornecimento (dd/mm/aaaa)
+            <input id="manual-first" type="text" placeholder="26/03/2026" />
+          </label>
+          <button id="btn-add-manual-etapas" class="secondary">Adicionar</button>
+        </div>
+        <div class="manual-form">
+          <label>Fornecimentos (datas)
+            <div class="fornec-row">
+              <div id="manual-fornec-list" class="fornec-list"></div>
+              <button id="btn-add-fornec" class="secondary">+ Fornecimento</button>
+            </div>
+          </label>
+        </div>
       </section>
 
       <section class="actions">

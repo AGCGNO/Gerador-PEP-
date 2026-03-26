@@ -1,4 +1,5 @@
 const pasteEtapas = document.getElementById("paste-etapas");
+const fileEtapas = document.getElementById("file-etapas");
 const btnPreview = document.getElementById("btn-preview-etapas");
 const btnApplyAdjust = document.getElementById("btn-apply-adjust");
 const btnCopy = document.getElementById("btn-copy-etapas");
@@ -12,6 +13,14 @@ const adjustContrato = document.getElementById("adjust-contrato");
 const adjustEmissao = document.getElementById("adjust-emissao");
 const adjustTermo = document.getElementById("adjust-termo");
 const adjustFornec = document.getElementById("adjust-fornec");
+const manualId = document.getElementById("manual-id");
+const manualTotal = document.getElementById("manual-total");
+const manualFirst = document.getElementById("manual-first");
+const btnAddManual = document.getElementById("btn-add-manual-etapas");
+const btnAddFornec = document.getElementById("btn-add-fornec");
+const manualFornecList = document.getElementById("manual-fornec-list");
+
+let manualEtapas = [];
 const filterId = document.getElementById("filter-id");
 
 const OUTPUT_HEADERS = [
@@ -73,6 +82,24 @@ function parseMonthHeader(header) {
   const yearRaw = match[2];
   const year = yearRaw.length === 2 ? 2000 + parseInt(yearRaw, 10) : parseInt(yearRaw, 10);
   return { month, year };
+}
+
+function parseMonthToken(token) {
+  const t = token.trim().toLowerCase();
+  if (!t) return null;
+  const monthMatch = t.match(
+    /(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[/ -]?(\d{2,4})/
+  );
+  if (monthMatch) {
+    const info = parseMonthHeader(monthMatch[0]);
+    return info ? new Date(info.year, info.month - 1, 26) : null;
+  }
+  const yearMatch = t.match(/^20\d{2}$/);
+  if (yearMatch) {
+    const year = parseInt(yearMatch[0], 10);
+    return new Date(year, 0, 26);
+  }
+  return null;
 }
 
 function formatDate(date) {
@@ -152,6 +179,28 @@ function detectColumns(headerRow) {
     monthCols,
     yearCols,
   };
+}
+
+function findHeaderIndex(rows) {
+  for (let i = 0; i < rows.length; i += 1) {
+    const cols = detectColumns(rows[i] || []);
+    const hits = [cols.idProjeto, cols.idReal, cols.coletor].filter(
+      (v) => v !== -1
+    ).length;
+    const hasMonths = cols.monthCols.length > 0 || cols.yearCols.length > 0;
+    if (hits >= 1 && hasMonths) {
+      const sample = rows.slice(i + 1, i + 20);
+      const hasData = sample.some((r) => {
+        const id =
+          (cols.idProjeto >= 0 ? r[cols.idProjeto] : "") ||
+          (cols.idReal >= 0 ? r[cols.idReal] : "") ||
+          (cols.coletor >= 0 ? r[cols.coletor] : "");
+        return /COO\./i.test(id || "");
+      });
+      if (hasData) return i;
+    }
+  }
+  return -1;
 }
 
 function renderTable(container, rows, highlightId = "") {
@@ -469,15 +518,178 @@ function buildEtapas(rows, header, overrides = {}) {
   return output;
 }
 
+function buildManualEtapas(items, overrides = {}) {
+  const output = [];
+  items.forEach((item) => {
+    const idProjClean = (item.id || "").trim();
+    if (!idProjClean || !/^COO\./i.test(idProjClean)) return;
+    const total = item.total || 0;
+    let fornecimentoItems = item.fornecimentoItems || [];
+    if (!fornecimentoItems.length && item.firstDate) {
+      fornecimentoItems = [{ date: item.firstDate, kind: "month", year: item.firstDate.getFullYear() }];
+    }
+    if (!fornecimentoItems.length) return;
+
+    const override = overrides[idProjClean] || {};
+    const groupInfo = projectGroup(total);
+    const leadDays = leadDaysByValue(total);
+    const firstFornec = fornecimentoItems.map((m) => m.date).sort((a, b) => a - b)[0];
+    const lastFornec = fornecimentoItems.map((m) => m.date).sort((a, b) => a - b).slice(-1)[0];
+
+    const contratoDays = override.contratoDays ?? 180;
+    const emissaoDays = override.emissaoDays ?? 15;
+    const termoDays = override.termoDays ?? 30;
+    const fornecOffset = override.fornecOffset ?? 0;
+    if (fornecOffset) {
+      fornecimentoItems = fornecimentoItems.map((it) => ({ ...it, date: addDays(it.date, fornecOffset) }));
+    }
+
+    const contrato = addDays(firstFornec, -contratoDays);
+    const aprovacao = addDays(contrato, -leadDays);
+    const emissao = addDays(aprovacao, -emissaoDays);
+    const termo = addDays(emissao, -termoDays);
+    const levantamento = addDays(termo, -30);
+    const execucao = lastFornec;
+    const conclOffset = override.conclOffset || 0;
+    const encOffset = override.encOffset || 0;
+    const conclusao = addDays(addDays(execucao, 90), conclOffset);
+    const encerramento = addDays(addDays(conclusao, 90), encOffset);
+
+    let etapaCounter = 1;
+    const projectRows = [];
+    const etapasBase = [
+      ["1 - Levantamento de Dados", "Levantamento de Dados", 5, levantamento],
+      ["2 - Termo de Referência", "Termo de Referência", 5, termo],
+      ["3 - Emissão da RC", "Emissão da RC", 5, emissao],
+      ["4 - Aprovação da RC", "Aprovação da RC", 5, aprovacao],
+      ["5 - Contratação", "Assinatura do Contrato", 5, contrato],
+    ];
+    etapasBase.forEach((e) => {
+      const idEtapa = `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`;
+      etapaCounter += 1;
+      projectRows.push([
+        idEtapa,
+        idProjClean,
+        e[0],
+        e[1],
+        `${e[2].toFixed(2)}%`,
+        formatDate(e[3]),
+        "",
+        groupInfo.weight,
+        total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+      ]);
+    });
+
+    const fornecPeso = 35 / fornecimentoItems.length;
+    const monthByYear = {};
+    fornecimentoItems.forEach((it) => {
+      if (it.kind === "month") monthByYear[it.year] = (monthByYear[it.year] || 0) + 1;
+    });
+    const monthIndexByYear = {};
+    fornecimentoItems.forEach((it) => {
+      let etapaLabel = "Fornecimento";
+      if (it.kind === "year") etapaLabel = `Fornecimento ${it.year}`;
+      else {
+        const count = monthByYear[it.year] || 0;
+        if (count > 1) {
+          const idx = (monthIndexByYear[it.year] || 0) + 1;
+          monthIndexByYear[it.year] = idx;
+          etapaLabel = `Fornecimento ${idx}ª Remessa`;
+        } else {
+          etapaLabel = `Fornecimento ${it.year}`;
+        }
+      }
+      const idEtapa = `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`;
+      etapaCounter += 1;
+      projectRows.push([
+        idEtapa,
+        idProjClean,
+        "6 - Fornecimento",
+        etapaLabel,
+        `${fornecPeso.toFixed(2)}%`,
+        formatDate(it.date),
+        "",
+        groupInfo.weight,
+        total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+      ]);
+    });
+
+    const execCount =
+      groupInfo.group === "Grupo 4" || groupInfo.group === "Grupo 5"
+        ? Math.min(fornecimentoItems.length, 10)
+        : 1;
+    const execPeso = 35 / execCount;
+    for (let i = 0; i < execCount; i += 1) {
+      projectRows.push([
+        `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
+        idProjClean,
+        "7 - Execução",
+        execCount > 1 ? `Execução ${i + 1}` : "Execução",
+        `${execPeso.toFixed(2)}%`,
+        formatDate(execucao),
+        "",
+        groupInfo.weight,
+        total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+      ]);
+      etapaCounter += 1;
+    }
+
+    projectRows.push([
+      `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
+      idProjClean,
+      "8 - Encerramento",
+      "Conclusão do Projeto",
+      "5.00%",
+      formatDate(conclusao),
+      "",
+      groupInfo.weight,
+      total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+    ]);
+    etapaCounter += 1;
+    projectRows.push([
+      `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
+      idProjClean,
+      "8 - Encerramento",
+      "Encerramento Técnico PEP",
+      "0.00%",
+      formatDate(encerramento),
+      "",
+      groupInfo.weight,
+      total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+    ]);
+
+    const dateIndex = OUTPUT_HEADERS.indexOf("Fim Previsto");
+    const deltaIndex = OUTPUT_HEADERS.indexOf("Delta (dias)");
+    computeDeltaByMarco(projectRows, dateIndex, deltaIndex);
+    projectRows.forEach((r) => output.push(r));
+  });
+  return output;
+}
+
 btnPreview.addEventListener("click", () => {
   const rows = parseTsvAny(pasteEtapas.value);
-  if (!rows.length) return;
-  const header = rows[0];
-  const data = rows.slice(1);
-  window.__etapasHeader = header;
-  window.__etapasData = data;
+  let output = [];
+  if (rows.length) {
+    const headerIndex = findHeaderIndex(rows);
+    if (headerIndex === -1) {
+      warnings.textContent = "Cabeçalho não encontrado.";
+      return;
+    }
+    const trimmed = rows.slice(headerIndex);
+    pasteEtapas.value = aoaToTsv(trimmed);
+    const header = trimmed[0];
+    const data = trimmed.slice(1);
+    window.__etapasHeader = header;
+    window.__etapasData = data;
+    window.__etapasOverrides = window.__etapasOverrides || {};
+    output = buildEtapas(data, header, window.__etapasOverrides);
+  }
+
+  if (manualEtapas.length) {
+    output = output.concat(buildManualEtapas(manualEtapas, window.__etapasOverrides || {}));
+  }
+
   window.__etapasOverrides = window.__etapasOverrides || {};
-  const output = buildEtapas(data, header, window.__etapasOverrides);
   renderTable(tableEtapas, output);
   populateFilter(output);
 });
@@ -515,6 +727,68 @@ btnDownload.addEventListener("click", () => {
 
 renderTable(tableEtapas, []);
 updateAdjustState();
+
+function aoaToTsv(data) {
+  return data.map((row) => row.join("\t")).join("\n");
+}
+
+fileEtapas.addEventListener("change", async () => {
+  const file = fileEtapas.files?.[0];
+  if (!file) return;
+  let data = [];
+  if (file.name.toLowerCase().endsWith(".csv")) {
+    const text = await file.text();
+    const wb = XLSX.read(text, { type: "string" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  } else {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  }
+  let rows = data;
+  const headerIndex = findHeaderIndex(rows);
+  if (headerIndex !== -1) {
+    rows = rows.slice(headerIndex);
+  }
+  const tsv = aoaToTsv(rows);
+  pasteEtapas.value = tsv;
+  localStorage.setItem("etapas_tsv", tsv);
+});
+
+// Não pré-carregar conteúdo salvo para manter o campo em branco
+
+function addFornecInput(value = "") {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "26/03/2026";
+  input.value = value;
+  manualFornecList.appendChild(input);
+}
+
+btnAddFornec.addEventListener("click", () => addFornecInput());
+
+// cria um campo inicial
+addFornecInput();
+
+btnAddManual.addEventListener("click", () => {
+  const id = (manualId.value || "").trim();
+  const total = parseNumber(manualTotal.value || "") || 0;
+  const firstDate = parseDate(manualFirst.value || "");
+  const fornecimentoItems = Array.from(manualFornecList.querySelectorAll("input"))
+    .map((inp) => parseDate(inp.value || ""))
+    .filter(Boolean)
+    .map((date) => ({ date, kind: "month", year: date.getFullYear() }));
+
+  if (!id) return;
+  manualEtapas.push({ id, total, fornecimentoItems, firstDate });
+  manualId.value = "";
+  manualTotal.value = "";
+  manualFirst.value = "";
+  manualFornecList.innerHTML = "";
+  addFornecInput();
+});
 
 function populateFilter(rows) {
   const ids = new Set(rows.map((r) => r[1]).filter(Boolean));
