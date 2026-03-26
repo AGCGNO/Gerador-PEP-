@@ -1,4 +1,6 @@
 const sapTextarea = document.getElementById("paste-sap");
+const fileCapex = document.getElementById("file-capex");
+const btnLoadCapex = document.getElementById("btn-load-capex");
 
 const tableOutput = document.getElementById("table-output");
 const warningsBox = document.getElementById("warnings");
@@ -578,3 +580,24 @@ filterPep.addEventListener("change", () => {
   const rest = window.__pepOutput.filter((r) => !r[2]?.startsWith(base));
   renderOutputTable([...selected, ...rest], base);
 });
+
+function aoaToTsv(data) {
+  return data.map((row) => row.join("\t")).join("\n");
+}
+
+btnLoadCapex.addEventListener("click", async () => {
+  const file = fileCapex.files?.[0];
+  if (!file) return;
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const sheet = wb.Sheets[wb.SheetNames[0]];
+  const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  const tsv = aoaToTsv(data);
+  sapTextarea.value = tsv;
+  localStorage.setItem("capex_tsv", tsv);
+});
+
+const savedCapex = localStorage.getItem("capex_tsv");
+if (savedCapex && !sapTextarea.value) {
+  sapTextarea.value = savedCapex;
+}
