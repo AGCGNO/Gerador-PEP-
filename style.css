@@ -27,9 +27,10 @@ body {
 }
 
 .page {
-  max-width: 1200px;
+  max-width: 1600px;
+  width: 100%;
   margin: 0 auto;
-  padding: 32px 20px 60px;
+  padding: 32px 24px 60px;
 }
 
 .nav {

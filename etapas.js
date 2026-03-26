@@ -6,6 +6,7 @@ const btnCopy = document.getElementById("btn-copy-etapas");
 const btnDownload = document.getElementById("btn-download-etapas");
 const tableEtapas = document.getElementById("table-etapas");
 const warnings = document.getElementById("warnings-etapas");
+const warningsGenerate = document.getElementById("warnings-etapas-generate");
 const adjustConcl = document.getElementById("adjust-concl");
 const adjustEnc = document.getElementById("adjust-enc");
 const adjustTotal = document.getElementById("adjust-total");
@@ -181,26 +182,123 @@ function detectColumns(headerRow) {
   };
 }
 
-function findHeaderIndex(rows) {
+function detectColumnsByScan(rows) {
+  const maxRows = Math.min(rows.length, 200);
+  const result = {
+    idProjeto: -1,
+    idReal: -1,
+    coletor: -1,
+    fimPrevisto: -1,
+    total: -1,
+    monthCols: [],
+    yearCols: [],
+    _rows: {},
+    _score: 0,
+    _headerIndex: -1,
+  };
+
+  const checkDataBelow = (col, startRow, regex) => {
+    if (!regex) return true;
+    const sample = rows.slice(startRow + 1, startRow + 30);
+    return sample.some((r) => regex.test(String(r[col] || "")));
+  };
+
+  for (let r = 0; r < maxRows; r += 1) {
+    const row = rows[r] || [];
+    row.forEach((cell, c) => {
+      const h = normalizeKey(cell || "");
+      if (!h) return;
+      if (parseMonthHeader(h)) result.monthCols.push(c);
+      if (/^20\\d{2}$/.test(h)) result.yearCols.push(c);
+    });
+  }
+
+  const seek = (aliases, key, regex) => {
+    for (let r = 0; r < maxRows; r += 1) {
+      const row = rows[r] || [];
+      for (let c = 0; c < row.length; c += 1) {
+        const cell = normalizeKey(row[c] || "");
+        if (!cell) continue;
+        if (aliases.some((alias) => cell.includes(alias))) {
+          if (checkDataBelow(c, r, regex)) {
+            result[key] = c;
+            result._rows[key] = r;
+            return;
+          }
+        }
+      }
+    }
+  };
+
+  seek(["ID PROJETO"], "idProjeto", /COO\\./i);
+  seek(["ID REAL", "ID SIGEP", "ID"], "idReal", /COO\\./i);
+  seek(["COLETOR", "DEFINICAO", "DEFINIÇÃO", "PEP SIGEP"], "coletor", /COO\\./i);
+  seek(["FIM PREVISTO"], "fimPrevisto", /\\d{4}/);
+  seek(["2026-2030", "2026 2030", "2026/2030"], "total", /\\d/);
+
+  const foundCount = ["idProjeto", "idReal", "coletor"].filter(
+    (k) => result[k] !== -1
+  ).length;
+  const headerIndex = Math.max(
+    ...Object.values(result._rows || {}).filter((v) => typeof v === "number"),
+    -1
+  );
+  const sample = headerIndex >= 0 ? rows.slice(headerIndex + 1, headerIndex + 30) : [];
+  const hasData = sample.some((r) => {
+    const id =
+      (result.idProjeto >= 0 ? r[result.idProjeto] : "") ||
+      (result.idReal >= 0 ? r[result.idReal] : "") ||
+      (result.coletor >= 0 ? r[result.coletor] : "");
+    return /COO\\./i.test(id || "");
+  });
+
+  result._score =
+    foundCount + (result.monthCols.length || result.yearCols.length ? 1 : 0) + (hasData ? 2 : 0);
+  result._headerIndex = Number.isFinite(headerIndex) ? headerIndex : -1;
+  return result;
+}
+
+function findHeaderAndColumns(rows) {
+  let bestIndex = -1;
+  let bestScore = -1;
+  let bestCols = null;
   for (let i = 0; i < rows.length; i += 1) {
     const cols = detectColumns(rows[i] || []);
     const hits = [cols.idProjeto, cols.idReal, cols.coletor].filter(
       (v) => v !== -1
     ).length;
     const hasMonths = cols.monthCols.length > 0 || cols.yearCols.length > 0;
-    if (hits >= 1 && hasMonths) {
-      const sample = rows.slice(i + 1, i + 20);
-      const hasData = sample.some((r) => {
-        const id =
-          (cols.idProjeto >= 0 ? r[cols.idProjeto] : "") ||
-          (cols.idReal >= 0 ? r[cols.idReal] : "") ||
-          (cols.coletor >= 0 ? r[cols.coletor] : "");
-        return /COO\./i.test(id || "");
-      });
-      if (hasData) return i;
+    if (hits <= 0 || !hasMonths) continue;
+    const sample = rows.slice(i + 1, i + 30);
+    const hasData = sample.some((r) => {
+      const id =
+        (cols.idProjeto >= 0 ? r[cols.idProjeto] : "") ||
+        (cols.idReal >= 0 ? r[cols.idReal] : "") ||
+        (cols.coletor >= 0 ? r[cols.coletor] : "");
+      return /COO\\./i.test(id || "");
+    });
+    const score = hits + (hasData ? 2 : 0) + (hasMonths ? 1 : 0);
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = i;
+      bestCols = cols;
     }
   }
-  return -1;
+
+  if (bestIndex !== -1 && bestScore >= 2) {
+    return { headerIndex: bestIndex, cols: bestCols, score: bestScore };
+  }
+
+  const scanned = detectColumnsByScan(rows);
+  if (scanned._headerIndex !== -1) {
+    return {
+      headerIndex: scanned._headerIndex,
+      cols: scanned,
+      score: scanned._score || 0,
+    };
+  }
+
+  return { headerIndex: -1, cols: detectColumns(rows[0] || []), score: -1 };
 }
 
 function renderTable(container, rows, highlightId = "") {
@@ -299,8 +397,8 @@ function computeDeltaByMarco(rows, dateIndex, deltaIndex) {
   });
 }
 
-function buildEtapas(rows, header, overrides = {}) {
-  const cols = detectColumns(header);
+function buildEtapas(rows, header, overrides = {}, headerCols = null) {
+  const cols = headerCols || detectColumns(header);
   const missing = [];
   if (cols.idProjeto === -1 && cols.idReal === -1 && cols.coletor === -1) {
     missing.push("ID Projeto/ID real/Coletor");
@@ -309,9 +407,12 @@ function buildEtapas(rows, header, overrides = {}) {
     missing.push("Meses/Anos ou FIM PREVISTO");
   }
   if (missing.length) {
-    warnings.textContent = "Colunas não identificadas: " + missing.join(", ");
+    const msg = "Colunas não identificadas: " + missing.join(", ");
+    warnings.textContent = msg;
+    if (warningsGenerate) warningsGenerate.textContent = msg;
   } else {
     warnings.textContent = "";
+    if (warningsGenerate) warningsGenerate.textContent = "";
   }
 
   const output = [];
@@ -325,6 +426,10 @@ function buildEtapas(rows, header, overrides = {}) {
     if (!idProjClean) return;
     if (!/^COO\./i.test(idProjClean)) {
       warnings.textContent = "Existem IDs sem prefixo COO. (linhas ignoradas)";
+      if (warningsGenerate) {
+        warningsGenerate.textContent =
+          "Existem IDs sem prefixo COO. (linhas ignoradas)";
+      }
       return;
     }
 
@@ -670,9 +775,11 @@ btnPreview.addEventListener("click", () => {
   const rows = parseTsvAny(pasteEtapas.value);
   let output = [];
   if (rows.length) {
-    const headerIndex = findHeaderIndex(rows);
+    const headerInfo = findHeaderAndColumns(rows);
+    const headerIndex = headerInfo.headerIndex;
     if (headerIndex === -1) {
       warnings.textContent = "Cabeçalho não encontrado.";
+      if (warningsGenerate) warningsGenerate.textContent = "Cabeçalho não encontrado.";
       return;
     }
     const trimmed = rows.slice(headerIndex);
@@ -681,8 +788,9 @@ btnPreview.addEventListener("click", () => {
     const data = trimmed.slice(1);
     window.__etapasHeader = header;
     window.__etapasData = data;
+    window.__etapasCols = headerInfo.cols;
     window.__etapasOverrides = window.__etapasOverrides || {};
-    output = buildEtapas(data, header, window.__etapasOverrides);
+    output = buildEtapas(data, header, window.__etapasOverrides, headerInfo.cols);
   }
 
   if (manualEtapas.length) {
@@ -735,22 +843,28 @@ function aoaToTsv(data) {
 fileEtapas.addEventListener("change", async () => {
   const file = fileEtapas.files?.[0];
   if (!file) return;
-  let data = [];
+  let wb;
   if (file.name.toLowerCase().endsWith(".csv")) {
     const text = await file.text();
-    const wb = XLSX.read(text, { type: "string" });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    wb = XLSX.read(text, { type: "string" });
   } else {
     const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: "array" });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    wb = XLSX.read(buf, { type: "array" });
   }
-  let rows = data;
-  const headerIndex = findHeaderIndex(rows);
-  if (headerIndex !== -1) {
-    rows = rows.slice(headerIndex);
+
+  let best = { score: -1, rows: null, headerIndex: -1 };
+  wb.SheetNames.forEach((name) => {
+    const sheet = wb.Sheets[name];
+    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const info = findHeaderAndColumns(data);
+    if (info.score > best.score) {
+      best = { score: info.score, rows: data, headerIndex: info.headerIndex };
+    }
+  });
+
+  let rows = best.rows || [];
+  if (best.headerIndex !== -1) {
+    rows = rows.slice(best.headerIndex);
   }
   const tsv = aoaToTsv(rows);
   pasteEtapas.value = tsv;
@@ -846,7 +960,8 @@ btnApplyAdjust.addEventListener("click", () => {
   const output = buildEtapas(
     window.__etapasData,
     window.__etapasHeader,
-    window.__etapasOverrides
+    window.__etapasOverrides,
+    window.__etapasCols
   );
   const filtered = output.filter((r) => r[1] === id);
   const rest = output.filter((r) => r[1] !== id);

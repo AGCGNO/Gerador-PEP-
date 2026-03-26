@@ -3,6 +3,7 @@ const fileCapex = document.getElementById("file-capex");
 
 const tableOutput = document.getElementById("table-output");
 const warningsBox = document.getElementById("warnings");
+const warningsGenerate = document.getElementById("warnings-generate");
 
 const btnGenerate = document.getElementById("btn-generate");
 const btnCopy = document.getElementById("btn-copy");
@@ -93,23 +94,123 @@ function detectColumns(headerRow) {
   };
 }
 
-function findHeaderIndex(rows) {
+function detectColumnsByScan(rows) {
+  const maxRows = Math.min(rows.length, 200);
+  const fields = [
+    {
+      key: "coletor",
+      aliases: ["COLETOR", "DEFINICAO", "DEFINIÇÃO", "PEP SIGEP"],
+      data: /NGHI|COO/i,
+    },
+    {
+      key: "idReal",
+      aliases: ["ID REAL", "ID SIGEP", "ID"],
+      data: /COO\./i,
+    },
+    {
+      key: "desc",
+      aliases: ["DESCRICAO", "DESCRIÇÃO", "DENOMINACAO", "DENOMINAÇÃO"],
+    },
+    {
+      key: "objeto",
+      aliases: ["OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"],
+    },
+    {
+      key: "usina",
+      aliases: ["LOCAL", "USINA", "INSTALACAO", "INSTALAÇÃO"],
+    },
+  ];
+
+  const result = {
+    coletor: -1,
+    idReal: -1,
+    desc: -1,
+    objeto: -1,
+    usina: -1,
+    _rows: {},
+    _score: 0,
+    _headerIndex: -1,
+  };
+
+  const checkDataBelow = (col, startRow, regex) => {
+    if (!regex) return true;
+    const sample = rows.slice(startRow + 1, startRow + 30);
+    return sample.some((r) => regex.test(String(r[col] || "")));
+  };
+
+  for (const field of fields) {
+    for (let r = 0; r < maxRows; r += 1) {
+      const row = rows[r] || [];
+      for (let c = 0; c < row.length; c += 1) {
+        const cell = normalizeKey(row[c] || "");
+        if (!cell) continue;
+        if (field.aliases.some((alias) => cell.includes(alias))) {
+          if (checkDataBelow(c, r, field.data)) {
+            result[field.key] = c;
+            result._rows[field.key] = r;
+            r = maxRows; // break outer
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const foundCount = fields.filter((f) => result[f.key] !== -1).length;
+  const headerIndex = Math.max(
+    ...Object.values(result._rows || {}).filter((v) => typeof v === "number"),
+    -1
+  );
+  const sample = headerIndex >= 0 ? rows.slice(headerIndex + 1, headerIndex + 30) : [];
+  const hasData = sample.some((r) => {
+    const coletor = result.coletor >= 0 ? (r[result.coletor] || "") : "";
+    const id = result.idReal >= 0 ? (r[result.idReal] || "") : "";
+    return /NGHI|COO/i.test(coletor) || /COO\\./i.test(id);
+  });
+
+  result._score = foundCount + (hasData ? 2 : 0);
+  result._headerIndex = Number.isFinite(headerIndex) ? headerIndex : -1;
+  return result;
+}
+
+function findHeaderAndColumns(rows) {
+  let bestIndex = -1;
+  let bestScore = -1;
+  let bestCols = null;
   for (let i = 0; i < rows.length; i += 1) {
     const cols = detectColumns(rows[i] || []);
     const hits = [cols.coletor, cols.idReal, cols.desc, cols.usina].filter(
       (v) => v !== -1
     ).length;
-    if (hits >= 3) {
-      // Confirma se há dados válidos abaixo do cabeçalho
-      const sample = rows.slice(i + 1, i + 20);
-      const hasData = sample.some((r) => {
-        const coletor = cols.coletor >= 0 ? (r[cols.coletor] || "") : "";
-        return /NGHI|COO/i.test(coletor);
-      });
-      if (hasData) return i;
+    if (hits <= 0) continue;
+    const sample = rows.slice(i + 1, i + 30);
+    const hasData = sample.some((r) => {
+      const coletor = cols.coletor >= 0 ? (r[cols.coletor] || "") : "";
+      const id = cols.idReal >= 0 ? (r[cols.idReal] || "") : "";
+      return /NGHI|COO/i.test(coletor) || /COO\./i.test(id);
+    });
+    const score = hits + (hasData ? 2 : 0);
+    if (score > bestScore) {
+      bestScore = score;
+      bestIndex = i;
+      bestCols = cols;
     }
   }
-  return -1;
+
+  if (bestIndex !== -1 && bestScore >= 2) {
+    return { headerIndex: bestIndex, cols: bestCols, score: bestScore };
+  }
+
+  const scanned = detectColumnsByScan(rows);
+  if (scanned._headerIndex !== -1) {
+    return {
+      headerIndex: scanned._headerIndex,
+      cols: scanned,
+      score: scanned._score || 0,
+    };
+  }
+
+  return { headerIndex: -1, cols: detectColumns(rows[0] || []), score: -1 };
 }
 
 function displayUsina(usinaKey) {
@@ -446,24 +547,28 @@ btnGenerate.addEventListener("click", () => {
   if (!sapRows.length && manualRows.length === 0) return;
   let projectRows = [];
   if (sapRows.length) {
-    const headerIndex = findHeaderIndex(sapRows);
+    const headerInfo = findHeaderAndColumns(sapRows);
+    const headerIndex = headerInfo.headerIndex;
     if (headerIndex === -1) {
       warningsBox.textContent = "Cabeçalho não encontrado.";
+      if (warningsGenerate) warningsGenerate.textContent = "Cabeçalho não encontrado.";
       return;
     }
     const header = sapRows[headerIndex];
     const data = sapRows.slice(headerIndex + 1);
-    const cols = detectColumns(header);
+    const cols = headerInfo.cols || detectColumns(header);
     const missing = [];
     if (cols.coletor === -1) missing.push("Coletor");
     if (cols.idReal === -1) missing.push("ID real");
     if (cols.desc === -1) missing.push("Descrição");
     if (cols.usina === -1) missing.push("Usina/Local");
     if (missing.length) {
-      warningsBox.textContent =
-        "Colunas não identificadas: " + missing.join(", ");
+      const msg = "Colunas não identificadas: " + missing.join(", ");
+      warningsBox.textContent = msg;
+      if (warningsGenerate) warningsGenerate.textContent = msg;
     } else {
       warningsBox.textContent = "";
+      if (warningsGenerate) warningsGenerate.textContent = "";
     }
     projectRows = data
       .map((row) => [
@@ -483,6 +588,9 @@ btnGenerate.addEventListener("click", () => {
   projectRows = [...projectRows, ...manualRows];
   const { output, warnings, projectsMeta } = buildOutput(projectRows);
   warningsBox.textContent = warnings.length ? warnings.join(" ") : "";
+  if (warningsGenerate) {
+    warningsGenerate.textContent = warnings.length ? warnings.join(" ") : "";
+  }
   window.__pepOutput = output;
   renderOutputTable(output);
   window.__pepMeta = projectsMeta;
@@ -611,22 +719,28 @@ function aoaToTsv(data) {
 fileCapex.addEventListener("change", async () => {
   const file = fileCapex.files?.[0];
   if (!file) return;
-  let data = [];
+  let wb;
   if (file.name.toLowerCase().endsWith(".csv")) {
     const text = await file.text();
-    const wb = XLSX.read(text, { type: "string" });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    wb = XLSX.read(text, { type: "string" });
   } else {
     const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: "array" });
-    const sheet = wb.Sheets[wb.SheetNames[0]];
-    data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    wb = XLSX.read(buf, { type: "array" });
   }
-  let rows = data;
-  const headerIndex = findHeaderIndex(rows);
-  if (headerIndex !== -1) {
-    rows = rows.slice(headerIndex);
+
+  let best = { score: -1, rows: null, headerIndex: -1 };
+  wb.SheetNames.forEach((name) => {
+    const sheet = wb.Sheets[name];
+    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const info = findHeaderAndColumns(data);
+    if (info.score > best.score) {
+      best = { score: info.score, rows: data, headerIndex: info.headerIndex };
+    }
+  });
+
+  let rows = best.rows || [];
+  if (best.headerIndex !== -1) {
+    rows = rows.slice(best.headerIndex);
   }
   const tsv = aoaToTsv(rows);
   sapTextarea.value = tsv;
