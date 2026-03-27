@@ -318,15 +318,21 @@ function renderTable(container, rows, highlightId = "") {
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
+  const lockedStart = OUTPUT_HEADERS.indexOf("Peso Etapa");
   rows.forEach((row) => {
     const tr = document.createElement("tr");
     if (highlightId && row[1] === highlightId) {
       tr.classList.add("row-highlight");
     }
-    row.forEach((cell) => {
+    row.forEach((cell, idx) => {
       const td = document.createElement("td");
       td.textContent = cell;
-      td.setAttribute("contenteditable", "true");
+      if (lockedStart !== -1 && idx >= lockedStart) {
+        td.setAttribute("contenteditable", "false");
+        td.classList.add("locked");
+      } else {
+        td.setAttribute("contenteditable", "true");
+      }
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -571,25 +577,18 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
-    const execCount =
-      groupInfo.group === "Grupo 4" || groupInfo.group === "Grupo 5"
-        ? Math.min(fornecimentoItems.length, 10)
-        : 1;
-    const execPeso = 35 / execCount;
-    for (let i = 0; i < execCount; i += 1) {
-      projectRows.push([
-        `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
-        idProjClean,
-        "7 - Execução",
-        execCount > 1 ? `Execução ${i + 1}` : "Execução",
-        `${execPeso.toFixed(2)}%`,
-        formatDate(execucao),
-        "",
-        groupInfo.weight,
-        total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
-      ]);
-      etapaCounter += 1;
-    }
+    projectRows.push([
+      `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
+      idProjClean,
+      "7 - Execução",
+      "Execução",
+      "35.00%",
+      formatDate(execucao),
+      "",
+      groupInfo.weight,
+      total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+    ]);
+    etapaCounter += 1;
     projectRows.push([
       `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
       idProjClean,
@@ -719,25 +718,18 @@ function buildManualEtapas(items, overrides = {}) {
       ]);
     });
 
-    const execCount =
-      groupInfo.group === "Grupo 4" || groupInfo.group === "Grupo 5"
-        ? Math.min(fornecimentoItems.length, 10)
-        : 1;
-    const execPeso = 35 / execCount;
-    for (let i = 0; i < execCount; i += 1) {
-      projectRows.push([
-        `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
-        idProjClean,
-        "7 - Execução",
-        execCount > 1 ? `Execução ${i + 1}` : "Execução",
-        `${execPeso.toFixed(2)}%`,
-        formatDate(execucao),
-        "",
-        groupInfo.weight,
-        total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
-      ]);
-      etapaCounter += 1;
-    }
+    projectRows.push([
+      `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,
+      idProjClean,
+      "7 - Execução",
+      "Execução",
+      "35.00%",
+      formatDate(execucao),
+      "",
+      groupInfo.weight,
+      total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
+    ]);
+    etapaCounter += 1;
 
     projectRows.push([
       `${idProjClean}-${String(etapaCounter).padStart(2, "0")}`,

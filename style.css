@@ -297,6 +297,11 @@ td[contenteditable="true"] {
   font-family: var(--mono);
 }
 
+td.locked {
+  background: #f3f5fa;
+  color: #5b6c88;
+}
+
 .warnings {
   margin-bottom: 10px;
   color: var(--accent-dark);
