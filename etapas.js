@@ -38,7 +38,6 @@ const OUTPUT_HEADERS = [
 const ETAPAS_TEMPLATE_HEADERS = [
   "ID Projeto",
   "Descrição",
-  "FIM PREVISTO",
   "jan/26",
   "fev/26",
   "mar/26",
@@ -608,7 +607,12 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
 
     if (!fornecimentoDates.length) return;
 
-    let total = cols.total >= 0 ? parseCurrencyInput(row[cols.total]) : 0;
+    const explicitTotal = cols.total >= 0 ? parseCurrencyInput(row[cols.total]) : 0;
+    const computedTotal = [...monthItems, ...yearItems].reduce(
+      (sum, item) => sum + (item.value || 0),
+      0
+    );
+    let total = explicitTotal > 0 ? explicitTotal : computedTotal;
     const override = overrides[idProjClean];
     if (override && override.total) {
       total = override.total;
@@ -664,7 +668,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
         `${e[2].toFixed(2)}%`,
         formatDate(e[3]),
         "",
-        groupInfo.group,
+        groupInfo.weight,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -703,7 +707,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
         `${fornecPeso.toFixed(2)}%`,
         formatDate(item.date),
         "",
-        groupInfo.group,
+        groupInfo.weight,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -715,7 +719,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
       "35.00%",
       formatDate(execucao),
       "",
-      groupInfo.group,
+      groupInfo.weight,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -727,7 +731,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
       "5.00%",
       formatDate(conclusao),
       "",
-      groupInfo.group,
+      groupInfo.weight,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -739,7 +743,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
       "0.00%",
       formatDate(encerramento),
       "",
-      groupInfo.group,
+      groupInfo.weight,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
 
@@ -806,7 +810,7 @@ function buildManualEtapas(items, overrides = {}) {
         `${e[2].toFixed(2)}%`,
         formatDate(e[3]),
         "",
-        groupInfo.group,
+        groupInfo.weight,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -840,7 +844,7 @@ function buildManualEtapas(items, overrides = {}) {
         `${fornecPeso.toFixed(2)}%`,
         formatDate(it.date),
         "",
-        groupInfo.group,
+        groupInfo.weight,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -853,7 +857,7 @@ function buildManualEtapas(items, overrides = {}) {
       "35.00%",
       formatDate(execucao),
       "",
-      groupInfo.group,
+      groupInfo.weight,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -866,7 +870,7 @@ function buildManualEtapas(items, overrides = {}) {
       "5.00%",
       formatDate(conclusao),
       "",
-      groupInfo.group,
+      groupInfo.weight,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -878,7 +882,7 @@ function buildManualEtapas(items, overrides = {}) {
       "0.00%",
       formatDate(encerramento),
       "",
-      groupInfo.group,
+      groupInfo.weight,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
 
