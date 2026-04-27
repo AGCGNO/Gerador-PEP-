@@ -7,8 +7,8 @@ const warningsGenerate = document.getElementById("warnings-generate");
 const btnGenerate = document.getElementById("btn-generate");
 const btnCopy = document.getElementById("btn-copy");
 const btnDownload = document.getElementById("btn-download");
+const btnTemplatePep = document.getElementById("btn-template-pep");
 const btnRecalc = document.getElementById("btn-recalc");
-const btnAddManual = document.getElementById("btn-add-manual");
 const filterPep = document.getElementById("filter-pep");
 
 const recalcUsina = document.getElementById("recalc-usina");
@@ -18,7 +18,6 @@ const manualColetor = document.getElementById("manual-coletor");
 const manualIdReal = document.getElementById("manual-idreal");
 const manualDesc = document.getElementById("manual-desc");
 const manualObjeto = document.getElementById("manual-objeto");
-let manualRows = [];
 
 // Mapeamento obrigatório por usina.
 const USINAS = {
@@ -53,6 +52,14 @@ const DATASETS = {
     ],
   },
 };
+
+const PEP_TEMPLATE_HEADERS = [
+  "Coletor (Carga)",
+  "ID real",
+  "Descrição",
+  "Objeto/Especificação",
+  "Local/Usina",
+];
 
 function normalizeKey(text) {
   return text
@@ -541,8 +548,22 @@ function renderOutputTable(rows, highlightBase = "") {
   tableOutput.appendChild(table);
 }
 
+function collectManualRows() {
+  const row = [
+    manualColetor.value.trim(),
+    manualIdReal.value.trim(),
+    manualDesc.value.trim(),
+    manualUsina.value.trim(),
+    manualObjeto.value.trim(),
+  ];
+
+  if (!row[0] || !row[3]) return [];
+  return [row];
+}
+
 btnGenerate.addEventListener("click", () => {
   const sapRows = parseTsvAny(sapTextarea.value);
+  const manualRows = collectManualRows();
   if (!sapRows.length && manualRows.length === 0) return;
   let projectRows = [];
   if (sapRows.length) {
@@ -634,23 +655,6 @@ recalcUsina.addEventListener("change", () => {
   renderOutputTable(sorted, filterPep.value);
 });
 
-
-btnAddManual.addEventListener("click", () => {
-  const row = [
-    manualColetor.value.trim(),
-    manualIdReal.value.trim(),
-    manualDesc.value.trim(),
-    manualUsina.value.trim(),
-    manualObjeto.value.trim(),
-  ];
-  if (!row[0] || !row[3]) return;
-  manualRows.push(row);
-  manualColetor.value = "";
-  manualIdReal.value = "";
-  manualDesc.value = "";
-  manualObjeto.value = "";
-});
-
 btnCopy.addEventListener("click", async () => {
   const table = tableOutput.querySelector("table");
   if (!table) return;
@@ -680,6 +684,14 @@ btnDownload.addEventListener("click", () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "PEPs");
   XLSX.writeFile(workbook, "peps.xlsx");
+});
+
+btnTemplatePep.addEventListener("click", () => {
+  const rows = [PEP_TEMPLATE_HEADERS];
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo PEP");
+  XLSX.writeFile(workbook, "modelo_pep.xlsx");
 });
 
 renderOutputTable([]);

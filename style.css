@@ -118,6 +118,10 @@ body {
   align-items: end;
 }
 
+.manual-inline {
+  grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr) minmax(360px, 1.4fr);
+}
+
 .manual-form label {
   display: flex;
   flex-direction: column;
@@ -157,15 +161,16 @@ body {
 
 .fornec-list {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   flex: 1;
   min-width: 260px;
 }
 
 .fornec-item {
-  min-width: 210px;
-  flex: 1 1 240px;
+  min-width: 100%;
+  width: 100%;
+  flex: none;
 }
 
 #btn-add-fornec {
@@ -239,6 +244,19 @@ body {
   margin: 0 0 10px;
   font-size: 1.25rem;
   color: var(--accent-dark);
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.section-head h2 {
+  margin: 0;
 }
 
 .panel h3 {
@@ -494,5 +512,9 @@ td.locked {
 
   .fornec-list {
     min-width: 100%;
+  }
+
+  .manual-inline {
+    grid-template-columns: 1fr;
   }
 }

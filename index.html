@@ -28,7 +28,12 @@
       </nav>
 
       <section class="panel">
-        <h2>Dados CAPEX (com cabeçalho)</h2>
+        <div class="section-head">
+          <h2>Dados CAPEX (com cabeçalho)</h2>
+          <button id="btn-template-pep" class="btn btn-secondary-soft" type="button">
+            Baixar planilha padrão
+          </button>
+        </div>
         <p class="hint">
           Cole a planilha com cabeçalho. O sistema identifica automaticamente:
           Coletor de Custo / Definição / PEP SIGEP, ID real (ou ID SIGEP),
@@ -45,6 +50,7 @@
         <h2>Inserir manualmente</h2>
         <p class="hint">
           Use quando precisar criar um PEP específico sem colar do CAPEX.
+          Preencha os campos abaixo e clique em gerar.
         </p>
         <div class="manual-form">
           <label>Usina
@@ -89,9 +95,6 @@
               placeholder="Objeto do CAPEX"
             />
           </label>
-          <button id="btn-add-manual" class="btn btn-secondary-soft">
-            Adicionar à lista
-          </button>
         </div>
       </section>
 

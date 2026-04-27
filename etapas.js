@@ -3,6 +3,7 @@ const btnPreview = document.getElementById("btn-preview-etapas");
 const btnApplyAdjust = document.getElementById("btn-apply-adjust");
 const btnCopy = document.getElementById("btn-copy-etapas");
 const btnDownload = document.getElementById("btn-download-etapas");
+const btnTemplateEtapas = document.getElementById("btn-template-etapas");
 const tableEtapas = document.getElementById("table-etapas");
 const warnings = document.getElementById("warnings-etapas");
 const warningsGenerate = document.getElementById("warnings-etapas-generate");
@@ -30,8 +31,32 @@ const OUTPUT_HEADERS = [
   "Peso Etapa",
   "Fim Previsto",
   "Delta (dias)",
-  "Peso Grupo",
+  "Grupo",
   "Valor Total",
+];
+
+const ETAPAS_TEMPLATE_HEADERS = [
+  "ID Projeto",
+  "Descrição",
+  "FIM PREVISTO",
+  "jan/26",
+  "fev/26",
+  "mar/26",
+  "abr/26",
+  "mai/26",
+  "jun/26",
+  "jul/26",
+  "ago/26",
+  "set/26",
+  "out/26",
+  "nov/26",
+  "dez/26",
+  "2026",
+  "2027",
+  "2028",
+  "2029",
+  "2030",
+  "2026-2030",
 ];
 
 function normalizeKey(text) {
@@ -639,7 +664,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
         `${e[2].toFixed(2)}%`,
         formatDate(e[3]),
         "",
-        groupInfo.weight,
+        groupInfo.group,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -678,7 +703,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
         `${fornecPeso.toFixed(2)}%`,
         formatDate(item.date),
         "",
-        groupInfo.weight,
+        groupInfo.group,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -690,7 +715,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
       "35.00%",
       formatDate(execucao),
       "",
-      groupInfo.weight,
+      groupInfo.group,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -702,7 +727,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
       "5.00%",
       formatDate(conclusao),
       "",
-      groupInfo.weight,
+      groupInfo.group,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -714,7 +739,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
       "0.00%",
       formatDate(encerramento),
       "",
-      groupInfo.weight,
+      groupInfo.group,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
 
@@ -781,7 +806,7 @@ function buildManualEtapas(items, overrides = {}) {
         `${e[2].toFixed(2)}%`,
         formatDate(e[3]),
         "",
-        groupInfo.weight,
+        groupInfo.group,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -815,7 +840,7 @@ function buildManualEtapas(items, overrides = {}) {
         `${fornecPeso.toFixed(2)}%`,
         formatDate(it.date),
         "",
-        groupInfo.weight,
+        groupInfo.group,
         total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
       ]);
     });
@@ -828,7 +853,7 @@ function buildManualEtapas(items, overrides = {}) {
       "35.00%",
       formatDate(execucao),
       "",
-      groupInfo.weight,
+      groupInfo.group,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -841,7 +866,7 @@ function buildManualEtapas(items, overrides = {}) {
       "5.00%",
       formatDate(conclusao),
       "",
-      groupInfo.weight,
+      groupInfo.group,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
     etapaCounter += 1;
@@ -853,7 +878,7 @@ function buildManualEtapas(items, overrides = {}) {
       "0.00%",
       formatDate(encerramento),
       "",
-      groupInfo.weight,
+      groupInfo.group,
       total.toLocaleString("pt-BR", { minimumFractionDigits: 2 }),
     ]);
 
@@ -944,6 +969,14 @@ btnDownload.addEventListener("click", () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Etapas");
   XLSX.writeFile(workbook, "etapas.xlsx");
+});
+
+btnTemplateEtapas.addEventListener("click", () => {
+  const rows = [ETAPAS_TEMPLATE_HEADERS];
+  const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo Etapas");
+  XLSX.writeFile(workbook, "modelo_etapas.xlsx");
 });
 
 renderTable(tableEtapas, []);

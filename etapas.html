@@ -28,7 +28,12 @@
       </nav>
 
       <section class="panel">
-        <h2>Planilha de Projetos (com cabeçalho)</h2>
+        <div class="section-head">
+          <h2>Planilha de Projetos (com cabeçalho)</h2>
+          <button id="btn-template-etapas" class="btn btn-secondary-soft" type="button">
+            Baixar planilha padrão
+          </button>
+        </div>
         <p class="hint">
           Cole a planilha com cabeçalho. O sistema identifica automaticamente:
           ID Projeto, Descrição, FIM PREVISTO, meses (jan/26, fev/26, ...),
@@ -47,7 +52,7 @@
           Use quando não tiver planilha. Preencha os dados abaixo e clique em
           pré-visualização.
         </p>
-        <div class="manual-form">
+        <div class="manual-form manual-inline">
           <label>ID Projeto
             <input id="manual-id" class="form-control" type="text" placeholder="COO.NO26.127" />
           </label>
@@ -55,8 +60,6 @@
             <input id="manual-total" class="form-control" type="text" placeholder="21.500.000" />
             <small id="manual-total-help" class="field-help"></small>
           </label>
-        </div>
-        <div class="manual-form">
           <label>Fornecimentos (datas)
             <div class="fornec-row">
               <div id="manual-fornec-list" class="fornec-list"></div>
