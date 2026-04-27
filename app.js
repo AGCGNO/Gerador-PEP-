@@ -414,7 +414,7 @@ function buildOutput(projectRows) {
     ]);
     output.push([
       usinaDisplay,
-      "4.001",
+      "4",
       `${base}.00001.001`,
       idReal ? `${idReal} - CUSTO COMUM` : "",
       idReal,
@@ -424,7 +424,7 @@ function buildOutput(projectRows) {
     ]);
     output.push([
       usinaDisplay,
-      "4.002",
+      "4",
       `${base}.00001.002`,
       idReal ? `${idReal} - SERVIÇO` : "",
       idReal,
@@ -434,7 +434,7 @@ function buildOutput(projectRows) {
     ]);
     output.push([
       usinaDisplay,
-      "4.003",
+      "4",
       `${base}.00001.003`,
       denom403,
       idReal,
@@ -479,7 +479,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
     ]);
     output.push([
       item.usinaRaw,
-      "4.001",
+      "4",
       `${base}.00001.001`,
       item.idReal ? `${item.idReal} - CUSTO COMUM` : "",
       item.idReal,
@@ -489,7 +489,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
     ]);
     output.push([
       item.usinaRaw,
-      "4.002",
+      "4",
       `${base}.00001.002`,
       item.idReal ? `${item.idReal} - SERVIÇO` : "",
       item.idReal,
@@ -499,7 +499,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
     ]);
     output.push([
       item.usinaRaw,
-      "4.003",
+      "4",
       `${base}.00001.003`,
       item.denom403,
       item.idReal,
