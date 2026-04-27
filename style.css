@@ -23,44 +23,89 @@ body {
   margin: 0;
   font-family: var(--sans);
   color: var(--ink);
-  background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 60%);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.95) 0%, transparent 38%),
+    linear-gradient(180deg, #eef4ff 0%, var(--bg) 45%, #f5efe7 100%);
 }
 
 .page {
-  max-width: 1600px;
+  max-width: min(1880px, calc(100vw - 32px));
   width: 100%;
   margin: 0 auto;
-  padding: 32px 24px 60px;
+  padding: 28px 20px 60px;
 }
 
 .nav {
   display: flex;
   gap: 12px;
-  margin: 18px 0 10px;
+  margin: 22px 0 14px;
+  flex-wrap: wrap;
 }
 
 .nav a {
   text-decoration: none;
-  color: var(--accent-dark);
-  background: #ffffff;
-  border: 1px solid var(--border);
-  padding: 8px 14px;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.88), rgba(10, 0, 60, 0.92));
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 12px 20px;
   border-radius: 999px;
   font-weight: 600;
+  box-shadow: 0 12px 24px rgba(29, 78, 216, 0.16);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease,
+    background 0.2s ease;
 }
 
 .nav a.active {
-  background: var(--accent);
+  background: linear-gradient(135deg, #f9b50b, #ffdd72);
+  color: #0a003c;
+  border-color: rgba(249, 181, 11, 0.45);
+  box-shadow: 0 16px 32px rgba(249, 181, 11, 0.32);
+  outline: 3px solid rgba(10, 0, 60, 0.14);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  transform: translateY(-1px);
+}
+
+.nav a.active::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 6px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(10, 0, 60, 0.28);
+}
+
+.nav a:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(29, 78, 216, 0.22);
+}
+
+.nav a:focus-visible {
+  outline: 3px solid rgba(249, 181, 11, 0.45);
+  outline-offset: 3px;
+}
+
+.nav a.active:hover {
   color: #fff;
-  border-color: transparent;
+  color: #0a003c;
+}
+
+.nav a:not(.active) {
+  opacity: 0.78;
 }
 
 .hero {
-  padding: 22px 24px;
-  background: linear-gradient(120deg, var(--accent), var(--accent-dark));
+  padding: 26px 28px;
+  background:
+    linear-gradient(135deg, rgba(249, 181, 11, 0.12), transparent 32%),
+    linear-gradient(120deg, var(--accent), var(--accent-dark));
   color: #ffffff;
-  border-radius: 18px;
-  box-shadow: var(--shadow);
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(10, 0, 60, 0.18);
   display: flex;
   align-items: center;
   gap: 18px;
@@ -79,6 +124,26 @@ body {
   gap: 6px;
   font-size: 0.9rem;
   color: var(--muted);
+  align-self: start;
+}
+
+.field-title {
+  display: block;
+}
+
+.field-help {
+  font-size: 0.78rem;
+  color: #5b6c88;
+  line-height: 1.35;
+  min-height: 1.1rem;
+}
+
+.field-help:empty {
+  display: none;
+}
+
+.adjust-grid .field-title {
+  min-height: 2.9rem;
 }
 
 .manual-form input,
@@ -94,27 +159,32 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  flex: 1;
+  min-width: 260px;
 }
 
-.fornec-list input {
-  width: 140px;
+.fornec-item {
+  min-width: 210px;
+  flex: 1 1 240px;
 }
 
 #btn-add-fornec {
-  padding: 6px 10px;
-  font-size: 0.8rem;
+  padding: 8px 14px;
+  font-size: 0.9rem;
   white-space: nowrap;
+  min-width: 210px;
 }
 
 .fornec-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
+  flex-wrap: nowrap;
 }
 #btn-add-fornec {
-  align-self: center;
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  align-self: flex-start;
+  padding: 8px 14px;
+  font-size: 0.9rem;
 }
 
 .brand {
@@ -126,8 +196,10 @@ body {
 .logo-slot {
   width: 90px;
   height: 140px;
-  border-radius: 16px;
-  background: rgba(250, 245, 240, 0.2);
+  border-radius: 20px;
+  background: rgba(250, 245, 240, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -142,17 +214,18 @@ body {
 
 .hero h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 2.4vw, 2.5rem);
   letter-spacing: 0.5px;
 }
 
 .panel {
   margin-top: 26px;
-  background: var(--panel);
-  padding: 20px 22px;
-  border-radius: 14px;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 253, 248, 0.96));
+  padding: 22px 24px;
+  border-radius: 20px;
+  border: 1px solid rgba(201, 214, 234, 0.9);
+  box-shadow: 0 16px 40px rgba(10, 0, 60, 0.08);
 }
 
 .panel h2 {
@@ -175,10 +248,10 @@ body {
 
 textarea {
   width: 100%;
-  min-height: 130px;
+  min-height: 180px;
   padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   font-family: var(--mono);
   font-size: 0.95rem;
   background: #fcfbf9;
@@ -190,6 +263,7 @@ textarea {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .mapping {
@@ -222,6 +296,10 @@ textarea {
   gap: 8px;
   color: var(--muted);
   font-size: 0.9rem;
+  background: rgba(238, 244, 255, 0.72);
+  border: 1px solid rgba(201, 214, 234, 0.8);
+  border-radius: 14px;
+  padding: 10px 12px;
 }
 
 .inline-field input,
@@ -233,7 +311,7 @@ textarea {
   font-size: 0.9rem;
 }
 
-button {
+.page button {
   padding: 10px 18px;
   border: none;
   border-radius: 999px;
@@ -245,13 +323,64 @@ button {
   box-shadow: 0 8px 16px rgba(0, 0, 255, 0.18);
 }
 
-button:hover {
+.page button:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 20px rgba(0, 0, 255, 0.24);
 }
 
-button.secondary {
-  background: var(--accent-dark);
+.btn {
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.7rem 1.15rem;
+  letter-spacing: 0.01em;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1d4ed8, #0a003c);
+  border-color: transparent;
+  box-shadow: 0 12px 24px rgba(29, 78, 216, 0.22);
+  color: #ffffff;
+}
+
+.btn-secondary-soft {
+  color: var(--accent-dark);
+  border: 1px solid rgba(10, 0, 60, 0.12);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(230, 238, 255, 0.96));
+  box-shadow: 0 10px 22px rgba(10, 0, 60, 0.08);
+}
+
+.btn-secondary-soft:hover,
+.btn-secondary-soft:focus {
+  color: var(--accent-dark);
+  background: linear-gradient(180deg, #ffffff, #dbe8ff);
+  border-color: rgba(29, 78, 216, 0.22);
+  box-shadow: 0 12px 26px rgba(10, 0, 60, 0.12);
+}
+
+.btn-secondary-soft:disabled,
+.btn-secondary-soft.disabled {
+  color: #5b6c88;
+  background: linear-gradient(180deg, #eef2f8, #e4ebf6);
+  border-color: rgba(91, 108, 136, 0.18);
+  box-shadow: none;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.form-control,
+.form-select {
+  border-radius: 14px;
+  border: 1px solid rgba(201, 214, 234, 0.95);
+  font-family: var(--mono);
+  padding: 0.78rem 0.95rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 1px 2px rgba(10, 0, 60, 0.03);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: rgba(29, 78, 216, 0.45);
+  box-shadow: 0 0 0 0.2rem rgba(29, 78, 216, 0.14);
 }
 
 .tables {
@@ -266,9 +395,10 @@ button.secondary {
 
 .table-wrap {
   overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 1px solid rgba(201, 214, 234, 0.8);
+  border-radius: 18px;
   background: #fffdf8;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 table {
@@ -288,8 +418,9 @@ td {
 th {
   position: sticky;
   top: 0;
-  background: var(--info);
+  background: linear-gradient(180deg, #dfeafc, #cddcf5);
   font-weight: 600;
+  z-index: 1;
 }
 
 td[contenteditable="true"] {
@@ -306,6 +437,10 @@ td.locked {
   margin-bottom: 10px;
   color: var(--accent-dark);
   font-weight: 600;
+  background: rgba(249, 181, 11, 0.12);
+  border: 1px solid rgba(249, 181, 11, 0.28);
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
 .row-highlight td {
@@ -313,6 +448,24 @@ td.locked {
 }
 
 @media (max-width: 700px) {
+  .page {
+    max-width: calc(100vw - 16px);
+    padding: 20px 8px 40px;
+  }
+
+  .hero {
+    padding: 20px 18px;
+  }
+
+  .brand {
+    align-items: flex-start;
+  }
+
+  .logo-slot {
+    width: 72px;
+    height: 96px;
+  }
+
   table {
     min-width: 100%;
   }
@@ -320,5 +473,20 @@ td.locked {
   button {
     width: 100%;
     justify-content: center;
+  }
+
+  .inline-field {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fornec-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fornec-list {
+    min-width: 100%;
   }
 }

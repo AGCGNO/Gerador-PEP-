@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Gerador de Estruturas PEP da AGCGNO</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   </head>
@@ -30,10 +34,11 @@
           Coletor de Custo / Definição / PEP SIGEP, ID real (ou ID SIGEP),
           Descrição/Denominação, Objeto/Especificação e Local/Usina.
         </p>
-        <div class="actions">
-          <input id="file-capex" type="file" accept=".xlsx,.xls,.csv" />
-        </div>
-        <textarea id="paste-sap" placeholder="Cole aqui sua planilha com cabeçalho"></textarea>
+        <textarea
+          id="paste-sap"
+          class="form-control"
+          placeholder="Cole aqui sua planilha com cabeçalho"
+        ></textarea>
       </section>
 
       <section class="panel">
@@ -43,7 +48,7 @@
         </p>
         <div class="manual-form">
           <label>Usina
-            <select id="manual-usina">
+            <select id="manual-usina" class="form-select">
               <option value="">Selecione</option>
               <option value="BALBINA">BALBINA</option>
               <option value="COARACY NUNES">COARACY NUNES</option>
@@ -53,23 +58,45 @@
             </select>
           </label>
           <label>Coletor (Carga)
-            <input id="manual-coletor" type="text" placeholder="NGHI.0162.XX" />
+            <input
+              id="manual-coletor"
+              class="form-control"
+              type="text"
+              placeholder="NGHI.0162.XX"
+            />
           </label>
           <label>ID real
-            <input id="manual-idreal" type="text" placeholder="COO.NO26.019" />
+            <input
+              id="manual-idreal"
+              class="form-control"
+              type="text"
+              placeholder="COO.NO26.019"
+            />
           </label>
           <label>Descrição
-            <input id="manual-desc" type="text" placeholder="Descrição do projeto" />
+            <input
+              id="manual-desc"
+              class="form-control"
+              type="text"
+              placeholder="Descrição do projeto"
+            />
           </label>
           <label>Objeto
-            <input id="manual-objeto" type="text" placeholder="Objeto do CAPEX" />
+            <input
+              id="manual-objeto"
+              class="form-control"
+              type="text"
+              placeholder="Objeto do CAPEX"
+            />
           </label>
-          <button id="btn-add-manual" class="secondary">Adicionar à lista</button>
+          <button id="btn-add-manual" class="btn btn-secondary-soft">
+            Adicionar à lista
+          </button>
         </div>
       </section>
 
       <section class="actions">
-        <button id="btn-generate">Gerar PEPs</button>
+        <button id="btn-generate" class="btn btn-primary">Gerar PEPs</button>
         <div id="warnings-generate" class="warnings"></div>
       </section>
 
@@ -79,7 +106,7 @@
         <div class="actions">
           <label class="inline-field">
             Recalcular usina
-            <select id="recalc-usina">
+            <select id="recalc-usina" class="form-select">
               <option value="">Selecione</option>
               <option value="BALBINA">BALBINA</option>
               <option value="COARACY NUNES">COARACY NUNES</option>
@@ -90,14 +117,22 @@
           </label>
           <label class="inline-field">
             Novo início do sequencial
-            <input id="recalc-start" type="number" min="1" value="1" />
+            <input
+              id="recalc-start"
+              class="form-control"
+              type="number"
+              min="1"
+              value="1"
+            />
           </label>
-          <button id="btn-recalc" class="secondary">Recalcular sequencial</button>
+          <button id="btn-recalc" class="btn btn-secondary-soft">
+            Recalcular sequencial
+          </button>
         </div>
         <div class="actions">
           <label class="inline-field">
             Filtrar PEP
-            <select id="filter-pep">
+            <select id="filter-pep" class="form-select">
               <option value="">Todos</option>
             </select>
           </label>
@@ -108,12 +143,13 @@
         </p>
         <div id="table-output" class="table-wrap"></div>
         <div class="actions">
-          <button id="btn-copy">Copiar resultado</button>
-          <button id="btn-download">Baixar Excel</button>
+          <button id="btn-copy" class="btn btn-primary">Copiar resultado</button>
+          <button id="btn-download" class="btn btn-secondary-soft">Baixar Excel</button>
         </div>
       </section>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

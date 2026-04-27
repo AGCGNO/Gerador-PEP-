@@ -1,5 +1,4 @@
 const sapTextarea = document.getElementById("paste-sap");
-const fileCapex = document.getElementById("file-capex");
 
 const tableOutput = document.getElementById("table-output");
 const warningsBox = document.getElementById("warnings");
@@ -710,41 +709,6 @@ filterPep.addEventListener("change", () => {
   const selected = window.__pepOutput.filter((r) => r[2]?.startsWith(base));
   const rest = window.__pepOutput.filter((r) => !r[2]?.startsWith(base));
   renderOutputTable([...selected, ...rest], base);
-});
-
-function aoaToTsv(data) {
-  return data.map((row) => row.join("\t")).join("\n");
-}
-
-fileCapex.addEventListener("change", async () => {
-  const file = fileCapex.files?.[0];
-  if (!file) return;
-  let wb;
-  if (file.name.toLowerCase().endsWith(".csv")) {
-    const text = await file.text();
-    wb = XLSX.read(text, { type: "string" });
-  } else {
-    const buf = await file.arrayBuffer();
-    wb = XLSX.read(buf, { type: "array" });
-  }
-
-  let best = { score: -1, rows: null, headerIndex: -1 };
-  wb.SheetNames.forEach((name) => {
-    const sheet = wb.Sheets[name];
-    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    const info = findHeaderAndColumns(data);
-    if (info.score > best.score) {
-      best = { score: info.score, rows: data, headerIndex: info.headerIndex };
-    }
-  });
-
-  let rows = best.rows || [];
-  if (best.headerIndex !== -1) {
-    rows = rows.slice(best.headerIndex);
-  }
-  const tsv = aoaToTsv(rows);
-  sapTextarea.value = tsv;
-  localStorage.setItem("capex_tsv", tsv);
 });
 
 const savedCapex = localStorage.getItem("capex_tsv");

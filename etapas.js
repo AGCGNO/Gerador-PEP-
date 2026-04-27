@@ -1,5 +1,4 @@
 const pasteEtapas = document.getElementById("paste-etapas");
-const fileEtapas = document.getElementById("file-etapas");
 const btnPreview = document.getElementById("btn-preview-etapas");
 const btnApplyAdjust = document.getElementById("btn-apply-adjust");
 const btnCopy = document.getElementById("btn-copy-etapas");
@@ -16,12 +15,11 @@ const adjustTermo = document.getElementById("adjust-termo");
 const adjustFornec = document.getElementById("adjust-fornec");
 const manualId = document.getElementById("manual-id");
 const manualTotal = document.getElementById("manual-total");
-const manualFirst = document.getElementById("manual-first");
-const btnAddManual = document.getElementById("btn-add-manual-etapas");
+const manualTotalHelp = document.getElementById("manual-total-help");
+const adjustTotalHelp = document.getElementById("adjust-total-help");
 const btnAddFornec = document.getElementById("btn-add-fornec");
 const manualFornecList = document.getElementById("manual-fornec-list");
 
-let manualEtapas = [];
 const filterId = document.getElementById("filter-id");
 
 const OUTPUT_HEADERS = [
@@ -112,6 +110,59 @@ function parseCurrencyInput(value) {
   }
 
   return amount * 1000;
+}
+
+function formatCurrencyDisplay(value) {
+  if (!value) return "";
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+function updateCurrencyHelp(input, helpEl) {
+  if (!input || !helpEl) return;
+  const raw = String(input.value || "").trim();
+  if (!raw) {
+    helpEl.textContent = "";
+    return;
+  }
+
+  const parsed = parseCurrencyInput(raw);
+  if (!parsed) {
+    helpEl.textContent = "Valor nao identificado.";
+    return;
+  }
+
+  helpEl.textContent = `Valor interpretado: R$ ${formatCurrencyDisplay(parsed)}`;
+}
+
+function normalizeCurrencyField(input, helpEl) {
+  if (!input) return;
+  const raw = String(input.value || "").trim();
+  if (!raw) {
+    updateCurrencyHelp(input, helpEl);
+    return;
+  }
+
+  const parsed = parseCurrencyInput(raw);
+  if (!parsed) {
+    updateCurrencyHelp(input, helpEl);
+    return;
+  }
+
+  input.value = formatCurrencyDisplay(parsed);
+  updateCurrencyHelp(input, helpEl);
+}
+
+function bindCurrencyField(input, helpEl) {
+  if (!input) return;
+  input.addEventListener("input", () => updateCurrencyHelp(input, helpEl));
+  input.addEventListener("blur", () => normalizeCurrencyField(input, helpEl));
+  input.addEventListener("paste", () => {
+    setTimeout(() => normalizeCurrencyField(input, helpEl), 0);
+  });
+  updateCurrencyHelp(input, helpEl);
 }
 
 function parseMonthHeader(header) {
@@ -683,9 +734,6 @@ function buildManualEtapas(items, overrides = {}) {
     if (!idProjClean || !/^COO\./i.test(idProjClean)) return;
     const total = item.total || 0;
     let fornecimentoItems = item.fornecimentoItems || [];
-    if (!fornecimentoItems.length && item.firstDate) {
-      fornecimentoItems = [{ date: item.firstDate, kind: "month", year: item.firstDate.getFullYear() }];
-    }
     if (!fornecimentoItems.length) return;
 
     const override = overrides[idProjClean] || {};
@@ -817,8 +865,27 @@ function buildManualEtapas(items, overrides = {}) {
   return output;
 }
 
+function collectManualEtapas() {
+  const id = (manualId.value || "").trim();
+  const total = parseCurrencyInput(manualTotal.value || "") || 0;
+  const fornecimentoItems = Array.from(manualFornecList.querySelectorAll("input"))
+    .map((inp) => parseDate(inp.value || ""))
+    .filter(Boolean)
+    .map((date) => ({ date, kind: "month", year: date.getFullYear() }));
+
+  if (!id) return [];
+  if (!fornecimentoItems.length) return [];
+
+  return [{ id, total, fornecimentoItems }];
+}
+
+function aoaToTsv(data) {
+  return data.map((row) => row.join("\t")).join("\n");
+}
+
 btnPreview.addEventListener("click", () => {
   const rows = parseTsvAny(pasteEtapas.value);
+  const manualItems = collectManualEtapas();
   let output = [];
   if (rows.length) {
     const headerInfo = findHeaderAndColumns(rows);
@@ -839,8 +906,8 @@ btnPreview.addEventListener("click", () => {
     output = buildEtapas(data, header, window.__etapasOverrides, headerInfo.cols);
   }
 
-  if (manualEtapas.length) {
-    output = output.concat(buildManualEtapas(manualEtapas, window.__etapasOverrides || {}));
+  if (manualItems.length) {
+    output = output.concat(buildManualEtapas(manualItems, window.__etapasOverrides || {}));
   }
 
   window.__etapasOverrides = window.__etapasOverrides || {};
@@ -882,73 +949,28 @@ btnDownload.addEventListener("click", () => {
 renderTable(tableEtapas, []);
 updateAdjustState();
 
-function aoaToTsv(data) {
-  return data.map((row) => row.join("\t")).join("\n");
-}
-
-fileEtapas.addEventListener("change", async () => {
-  const file = fileEtapas.files?.[0];
-  if (!file) return;
-  let wb;
-  if (file.name.toLowerCase().endsWith(".csv")) {
-    const text = await file.text();
-    wb = XLSX.read(text, { type: "string" });
-  } else {
-    const buf = await file.arrayBuffer();
-    wb = XLSX.read(buf, { type: "array" });
-  }
-
-  let best = { score: -1, rows: null, headerIndex: -1 };
-  wb.SheetNames.forEach((name) => {
-    const sheet = wb.Sheets[name];
-    const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-    const info = findHeaderAndColumns(data);
-    if (info.score > best.score) {
-      best = { score: info.score, rows: data, headerIndex: info.headerIndex };
-    }
-  });
-
-  let rows = best.rows || [];
-  if (best.headerIndex !== -1) {
-    rows = rows.slice(best.headerIndex);
-  }
-  const tsv = aoaToTsv(rows);
-  pasteEtapas.value = tsv;
-  localStorage.setItem("etapas_tsv", tsv);
-});
-
 // Não pré-carregar conteúdo salvo para manter o campo em branco
 
 function addFornecInput(value = "") {
+  const wrapper = document.createElement("div");
+  wrapper.className = "fornec-item";
+
   const input = document.createElement("input");
   input.type = "text";
   input.placeholder = "26/03/2026";
   input.value = value;
-  manualFornecList.appendChild(input);
+  input.className = "form-control";
+
+  wrapper.appendChild(input);
+  manualFornecList.appendChild(wrapper);
 }
 
 btnAddFornec.addEventListener("click", () => addFornecInput());
 
 // cria um campo inicial
 addFornecInput();
-
-btnAddManual.addEventListener("click", () => {
-  const id = (manualId.value || "").trim();
-  const total = parseNumber(manualTotal.value || "") || 0;
-  const firstDate = parseDate(manualFirst.value || "");
-  const fornecimentoItems = Array.from(manualFornecList.querySelectorAll("input"))
-    .map((inp) => parseDate(inp.value || ""))
-    .filter(Boolean)
-    .map((date) => ({ date, kind: "month", year: date.getFullYear() }));
-
-  if (!id) return;
-  manualEtapas.push({ id, total, fornecimentoItems, firstDate });
-  manualId.value = "";
-  manualTotal.value = "";
-  manualFirst.value = "";
-  manualFornecList.innerHTML = "";
-  addFornecInput();
-});
+bindCurrencyField(manualTotal, manualTotalHelp);
+bindCurrencyField(adjustTotal, adjustTotalHelp);
 
 function populateFilter(rows) {
   const ids = new Set(rows.map((r) => r[1]).filter(Boolean));
