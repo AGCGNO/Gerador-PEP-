@@ -55,9 +55,63 @@ function parseTsvAny(text) {
 
 function parseNumber(value) {
   if (!value) return 0;
-  const cleaned = value.replace(/\./g, "").replace(",", ".");
-  const num = parseFloat(cleaned);
+  const raw = String(value).trim();
+  if (!raw) return 0;
+
+  const hasComma = raw.includes(",");
+  const hasDot = raw.includes(".");
+
+  let normalized = raw.replace(/\s/g, "");
+
+  // Aceita tanto "21.500.000,00" quanto "21,500,000.00" e "21500000".
+  if (hasComma && hasDot) {
+    const lastComma = raw.lastIndexOf(",");
+    const lastDot = raw.lastIndexOf(".");
+    if (lastDot > lastComma) {
+      normalized = raw.replace(/,/g, "");
+    } else {
+      normalized = raw.replace(/\./g, "").replace(/,/g, ".");
+    }
+  } else if (hasComma) {
+    const commaParts = raw.split(",");
+    const looksLikeThousands =
+      commaParts.length > 2 ||
+      (commaParts.length === 2 && /^\d{3}$/.test(commaParts[1]));
+    normalized = looksLikeThousands
+      ? raw.replace(/,/g, "")
+      : raw.replace(/,/g, ".");
+  } else if (hasDot) {
+    const dotParts = raw.split(".");
+    const looksLikeThousands =
+      dotParts.length > 2 ||
+      (dotParts.length === 2 && /^\d{3}$/.test(dotParts[1]));
+    normalized = looksLikeThousands ? raw.replace(/\./g, "") : raw;
+  }
+
+  normalized = normalized.replace(/[^\d.-]/g, "");
+  const num = parseFloat(normalized);
   return Number.isFinite(num) ? num : 0;
+}
+
+function parseCurrencyInput(value) {
+  const amount = parseNumber(value);
+  if (!amount) return 0;
+
+  const raw = String(value ?? "").trim();
+  if (!raw) return 0;
+
+  const digitsOnly = raw.replace(/\D/g, "");
+  const hasThousandsMask =
+    /^\d{1,3}([.,]\d{3})+([.,]\d{2})?$/.test(raw) ||
+    /^\d{5,}([.,]\d{2})?$/.test(raw);
+
+  // Mantém compatibilidade com planilhas antigas em "mil R$",
+  // mas evita multiplicar quando o valor já vier completo.
+  if (hasThousandsMask || digitsOnly.length >= 5 || Math.abs(amount) >= 100000) {
+    return amount;
+  }
+
+  return amount * 1000;
 }
 
 function parseMonthHeader(header) {
@@ -442,7 +496,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
     const monthItems = cols.monthCols
       .map((idx) => {
         const info = parseMonthHeader(header[idx]);
-        const value = parseNumber(row[idx]) * 1000;
+        const value = parseCurrencyInput(row[idx]);
         if (!info || value <= 0) return null;
         const date = new Date(info.year, info.month - 1, 26);
         return { date, value, kind: "month", year: info.year };
@@ -452,7 +506,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
     const yearItemsRaw = cols.yearCols
       .map((idx) => {
         const year = parseInt(normalizeKey(header[idx]), 10);
-        const value = parseNumber(row[idx]) * 1000;
+        const value = parseCurrencyInput(row[idx]);
         if (!Number.isFinite(year) || value <= 0) return null;
         const date = new Date(year, 0, 26);
         return { date, value, kind: "year", year };
@@ -478,7 +532,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
 
     if (!fornecimentoDates.length) return;
 
-    let total = cols.total >= 0 ? parseNumber(row[cols.total]) * 1000 : 0;
+    let total = cols.total >= 0 ? parseCurrencyInput(row[cols.total]) : 0;
     const override = overrides[idProjClean];
     if (override && override.total) {
       total = override.total;
