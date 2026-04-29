@@ -21,22 +21,63 @@ const manualObjeto = document.getElementById("manual-objeto");
 
 // Mapeamento obrigatório por usina.
 const USINAS = {
-  BALBINA: { prefix: "0161", lucro: "NO10101003", start: 1 },
-  "COARACY NUNES": { prefix: "0159", lucro: "N010102001", start: 3 },
-  "CURUA-UNA": { prefix: "0160", lucro: "N010103001", start: 4 },
-  SAMUEL: { prefix: "0160", lucro: "N010104001", start: 2 },
-  TUCURI: { prefix: "0162", lucro: "N010105001", start: 14 },
+  BALBINA: {
+    prefix: "0158",
+    centroCusto: "NO10101003",
+    lucro: "N010101001",
+    localInstalacao: "N-U-UHBA",
+    start: 4,
+  },
+  "COARACY NUNES": {
+    prefix: "0159",
+    centroCusto: "NO10102003",
+    lucro: "N010102001",
+    localInstalacao: "N-U-UHCN",
+    start: 3,
+  },
+  "CURUA-UNA": {
+    prefix: "0160",
+    centroCusto: "NO10103003",
+    lucro: "N010103001",
+    localInstalacao: "N-U-UHCU",
+    start: 4,
+  },
+  SAMUEL: {
+    prefix: "0161",
+    centroCusto: "NO10104003",
+    lucro: "N010104001",
+    localInstalacao: "N-U-UHSU",
+    start: 3,
+  },
+  TUCURI: {
+    prefix: "0162",
+    centroCusto: "NO10105003",
+    lucro: "N010105001",
+    localInstalacao: "N-U-UHTU",
+    start: 7,
+  },
 };
 
 const OUTPUT_HEADERS = [
   "Usina",
+  "Coletor",
   "Nível",
   "Elemento PEP",
   "Denominação",
+  "",
+  "",
+  "Pri",
+  "Local de Instalação",
+  "Perfil de Investimento",
   "ID real",
   "Tipo",
-  "Pri",
+  "Centro de custo",
   "Centro de lucro",
+  "PEP DE NIVEL ANTERIOR",
+  "Area contabel",
+  "Empresa",
+  "Data de inicio",
+  "Data de Fim",
 ];
 
 // Metadados para leitura das áreas de colagem.
@@ -227,6 +268,13 @@ function padSeq(seq) {
   return String(seq).padStart(2, "0");
 }
 
+function formatSapDate(date) {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}.${mm}.${yyyy}`;
+}
+
 // Converte texto colado do Excel em matriz de colunas fixas.
 function parseTsv(text, cols) {
   const lines = text
@@ -350,14 +398,15 @@ function shortenText(text) {
 
 function buildDenom403(idReal, objeto) {
   const obj = objeto ? shortenText(objeto) : "";
-  const base = [idReal, obj].filter((item) => item && item.trim()).join(" - ");
-  return base.slice(0, 40);
+  return obj.slice(0, 40);
 }
 
 // Gera a estrutura completa de PEPs a partir das regras.
 function buildOutput(projectRows) {
   const warnings = [];
   const currentSeqByPrefix = {};
+  const dataInicio = formatSapDate(new Date());
+  const dataFim = "31.12.2030";
 
   const output = [];
   const projectsMeta = [];
@@ -374,7 +423,7 @@ function buildOutput(projectRows) {
       return;
     }
 
-    const { prefix, lucro, start } = mapping;
+    const { prefix, centroCusto, lucro, localInstalacao, start } = mapping;
     if (currentSeqByPrefix[prefix] == null) {
       currentSeqByPrefix[prefix] = start;
     }
@@ -385,6 +434,7 @@ function buildOutput(projectRows) {
     const seq = currentSeqByPrefix[prefix];
     currentSeqByPrefix[prefix] += 1;
     const base = `NGHI.${prefix}.${padSeq(seq)}`;
+    const coletorBase = `NGHI.${prefix}`;
     const idReal = (idRealRaw || "").trim();
     const desc = shortenText(descRaw || "");
     const denom403 = buildDenom403(idReal, objetoRaw || "");
@@ -395,52 +445,119 @@ function buildOutput(projectRows) {
       usinaRaw: usinaDisplay,
       prefix,
       seq,
+      coletorBase,
       idReal,
       desc,
+      centroCusto,
       lucro,
+      localInstalacao,
       denom403,
     });
 
-    output.push([usinaDisplay, "2", base, desc, idReal, "G6", "7", lucro]);
     output.push([
       usinaDisplay,
+      coletorBase,
+      "2",
+      base,
+      desc,
+      "",
+      "",
+      "7",
+      localInstalacao,
+      "",
+      idReal,
+      "G6",
+      centroCusto,
+      lucro,
+      coletorBase,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
+    ]);
+    output.push([
+      usinaDisplay,
+      coletorBase,
       "3",
       `${base}.00001`,
       desc,
+      "",
+      "",
+      "7",
+      localInstalacao,
+      "",
       idReal,
       "G6",
-      "7",
+      centroCusto,
       lucro,
+      base,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       usinaDisplay,
+      coletorBase,
       "4",
       `${base}.00001.001`,
-      idReal ? `${idReal} - CUSTO COMUM` : "",
+      "CUSTO COMUM",
+      "",
+      "",
+      "3",
+      localInstalacao,
+      "",
       idReal,
       "G6",
-      "3",
+      centroCusto,
       lucro,
+      `${base}.00001`,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       usinaDisplay,
+      coletorBase,
       "4",
       `${base}.00001.002`,
-      idReal ? `${idReal} - SERVIÇO` : "",
+      "SERVIÇO",
+      "",
+      "",
+      "3",
+      localInstalacao,
+      "",
       idReal,
       "G6",
-      "3",
+      centroCusto,
       lucro,
+      `${base}.00001`,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       usinaDisplay,
+      coletorBase,
       "4",
       `${base}.00001.003`,
       denom403,
+      "",
+      "",
+      "2",
+      localInstalacao,
+      "",
       idReal,
       "G6",
-      "2",
+      centroCusto,
       lucro,
+      `${base}.00001`,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
   });
 
@@ -448,6 +565,8 @@ function buildOutput(projectRows) {
 }
 
 function rebuildFromMeta(meta, prioritizeKey = "") {
+  const dataInicio = formatSapDate(new Date());
+  const dataFim = "31.12.2030";
   const ordered = prioritizeKey
     ? [
         ...meta.filter((item) => item.usinaKey === prioritizeKey),
@@ -459,53 +578,108 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
     const base = `NGHI.${item.prefix}.${padSeq(item.seq)}`;
     output.push([
       item.usinaRaw,
+      item.coletorBase,
       "2",
       base,
       item.desc,
+      "",
+      "",
+      "7",
+      item.localInstalacao,
+      "",
       item.idReal,
       "G6",
-      "7",
+      item.centroCusto,
       item.lucro,
+      item.coletorBase,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       item.usinaRaw,
+      item.coletorBase,
       "3",
       `${base}.00001`,
       item.desc,
+      "",
+      "",
+      "7",
+      item.localInstalacao,
+      "",
       item.idReal,
       "G6",
-      "7",
+      item.centroCusto,
       item.lucro,
+      base,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       item.usinaRaw,
+      item.coletorBase,
       "4",
       `${base}.00001.001`,
-      item.idReal ? `${item.idReal} - CUSTO COMUM` : "",
+      "CUSTO COMUM",
+      "",
+      "",
+      "3",
+      item.localInstalacao,
+      "",
       item.idReal,
       "G6",
-      "3",
+      item.centroCusto,
       item.lucro,
+      `${base}.00001`,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       item.usinaRaw,
+      item.coletorBase,
       "4",
       `${base}.00001.002`,
-      item.idReal ? `${item.idReal} - SERVIÇO` : "",
+      "SERVIÇO",
+      "",
+      "",
+      "3",
+      item.localInstalacao,
+      "",
       item.idReal,
       "G6",
-      "3",
+      item.centroCusto,
       item.lucro,
+      `${base}.00001`,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
     output.push([
       item.usinaRaw,
+      item.coletorBase,
       "4",
       `${base}.00001.003`,
       item.denom403,
+      "",
+      "",
+      "2",
+      item.localInstalacao,
+      "",
       item.idReal,
       "G6",
-      "2",
+      item.centroCusto,
       item.lucro,
+      `${base}.00001`,
+      "FCE1",
+      "ENOR",
+      dataInicio,
+      dataFim,
     ]);
   });
   return output;
@@ -531,7 +705,7 @@ function renderOutputTable(rows, highlightBase = "") {
   const tbody = document.createElement("tbody");
   rows.forEach((row) => {
     const tr = document.createElement("tr");
-    if (highlightBase && row[2]?.startsWith(highlightBase)) {
+    if (highlightBase && row[3]?.startsWith(highlightBase)) {
       tr.classList.add("row-highlight");
     }
     row.forEach((cell) => {
@@ -698,7 +872,7 @@ renderOutputTable([]);
 
 function populatePepFilter(rows) {
   const set = new Set(
-    rows.filter((r) => r[1] === "2").map((r) => r[2]).filter(Boolean)
+    rows.filter((r) => r[2] === "2").map((r) => r[3]).filter(Boolean)
   );
   filterPep.innerHTML = '<option value="">Todos</option>';
   Array.from(set)
@@ -718,8 +892,8 @@ filterPep.addEventListener("change", () => {
     renderOutputTable(window.__pepOutput);
     return;
   }
-  const selected = window.__pepOutput.filter((r) => r[2]?.startsWith(base));
-  const rest = window.__pepOutput.filter((r) => !r[2]?.startsWith(base));
+  const selected = window.__pepOutput.filter((r) => r[3]?.startsWith(base));
+  const rest = window.__pepOutput.filter((r) => !r[3]?.startsWith(base));
   renderOutputTable([...selected, ...rest], base);
 });
 
