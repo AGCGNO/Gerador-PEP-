@@ -14,10 +14,14 @@ const filterPep = document.getElementById("filter-pep");
 const recalcUsina = document.getElementById("recalc-usina");
 const recalcStart = document.getElementById("recalc-start");
 const manualUsina = document.getElementById("manual-usina");
+const manualUsinaCustom = document.getElementById("manual-usina-custom");
 const manualColetor = document.getElementById("manual-coletor");
 const manualIdReal = document.getElementById("manual-idreal");
 const manualDesc = document.getElementById("manual-desc");
 const manualObjeto = document.getElementById("manual-objeto");
+const manualCentroCusto = document.getElementById("manual-centro-custo");
+const manualCentroLucro = document.getElementById("manual-centro-lucro");
+const manualLocal = document.getElementById("manual-local");
 
 // Mapeamento obrigatório por usina.
 const USINAS = {
@@ -74,10 +78,11 @@ const OUTPUT_HEADERS = [
   "Centro de custo",
   "Centro de lucro",
   "PEP DE NIVEL ANTERIOR",
-  "Area contabel",
+  "Área contábil",
   "Empresa",
   "Data de inicio",
   "Data de Fim",
+  "Norma de Apropriação",
 ];
 
 // Metadados para leitura das áreas de colagem.
@@ -89,17 +94,16 @@ const DATASETS = {
       "ID real",
       "Descrição",
       "Local/Usina",
-      "Objeto/Especificação",
+      "Equipamento/Especificação",
     ],
   },
 };
 
 const PEP_TEMPLATE_HEADERS = [
-  "Coletor (Carga)",
+  "Usina",
   "ID real",
   "Descrição",
-  "Objeto/Especificação",
-  "Local/Usina",
+  "Equipamento/Especificação",
 ];
 
 function normalizeKey(text) {
@@ -136,7 +140,7 @@ function detectColumns(headerRow) {
     coletor: find(["COLETOR", "DEFINICAO", "DEFINIÇÃO", "PEP SIGEP"]),
     idReal: find(["ID REAL", "ID SIGEP", "ID"]),
     desc: find(["DESCRICAO", "DESCRIÇÃO", "DENOMINACAO", "DENOMINAÇÃO"]),
-    objeto: find(["OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"]),
+    objeto: find(["EQUIPAMENTO", "OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"]),
     usina: find(["LOCAL", "USINA", "INSTALACAO", "INSTALAÇÃO"]),
   };
 }
@@ -160,7 +164,7 @@ function detectColumnsByScan(rows) {
     },
     {
       key: "objeto",
-      aliases: ["OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"],
+      aliases: ["EQUIPAMENTO", "OBJETO", "ESPECIFICACAO", "ESPECIFICAÇÃO"],
     },
     {
       key: "usina",
@@ -273,6 +277,18 @@ function formatSapDate(date) {
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const yyyy = date.getFullYear();
   return `${dd}.${mm}.${yyyy}`;
+}
+
+function normalizeCollectorBase(raw) {
+  const value = String(raw || "").trim().toUpperCase();
+  const match = value.match(/[A-Z]{3,12}\.\d+/);
+  return match ? match[0] : value;
+}
+
+function derivePrefixFromCollector(raw) {
+  const base = normalizeCollectorBase(raw);
+  const match = base.match(/[A-Z]{3,12}\.(\d+)/);
+  return match ? match[1] : "";
 }
 
 // Converte texto colado do Excel em matriz de colunas fixas.
@@ -397,8 +413,57 @@ function shortenText(text) {
 }
 
 function buildDenom403(idReal, objeto) {
-  const obj = objeto ? shortenText(objeto) : "";
+  const obj = objeto ? shortenText(objeto) : "EQUIPAMENTO";
   return obj.slice(0, 40);
+}
+
+function resolveProjectMapping(usinaRaw, rowData = {}) {
+  const usinaKey = resolveUsinaKey(usinaRaw);
+  const knownMapping = USINAS[usinaKey];
+  const advancedValues = [
+    rowData.customColetor,
+    rowData.customCentroCusto,
+    rowData.customCentroLucro,
+    rowData.customLocal,
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+  const inferredNgHi =
+    advancedValues.find((value) => /[A-Z]{3,12}\.\d+/i.test(value)) || "";
+
+  if (knownMapping) {
+    return {
+      usinaKey,
+      usinaDisplay: displayUsina(usinaKey),
+      ...knownMapping,
+      prefix: inferredNgHi
+        ? derivePrefixFromCollector(inferredNgHi) || knownMapping.prefix
+        : knownMapping.prefix,
+      centroCusto: rowData.customCentroCusto || knownMapping.centroCusto,
+      lucro: rowData.customCentroLucro || knownMapping.lucro,
+      localInstalacao: rowData.customLocal || knownMapping.localInstalacao,
+      start: knownMapping.start,
+      coletorBase: inferredNgHi
+        ? normalizeCollectorBase(inferredNgHi)
+        : `NGHI.${knownMapping.prefix}`,
+    };
+  }
+
+  const customPrefix = derivePrefixFromCollector(inferredNgHi);
+  if (usinaRaw && customPrefix) {
+    return {
+      usinaKey: "",
+      usinaDisplay: shortenText(String(usinaRaw).trim()),
+      prefix: customPrefix,
+      centroCusto: String(rowData.customCentroCusto || "").trim().toUpperCase(),
+      lucro: String(rowData.customCentroLucro || "").trim().toUpperCase(),
+      localInstalacao: String(rowData.customLocal || "").trim().toUpperCase(),
+      start: 1,
+      coletorBase: normalizeCollectorBase(inferredNgHi),
+    };
+  }
+
+  return null;
 }
 
 // Gera a estrutura completa de PEPs a partir das regras.
@@ -412,18 +477,40 @@ function buildOutput(projectRows) {
   const projectsMeta = [];
 
   projectRows.forEach((row, index) => {
-    const [coletorRaw, idRealRaw, descRaw, usinaRaw, objetoRaw] = row;
-    if (!coletorRaw) return;
+    const rowData = Array.isArray(row)
+      ? {
+          coletor: row[0] || "",
+          idReal: row[1] || "",
+          desc: row[2] || "",
+          usina: row[3] || "",
+          objeto: row[4] || "",
+        }
+      : row || {};
+    const coletorRaw = rowData.coletor || "";
+    const idRealRaw = rowData.idReal || "";
+    const descRaw = rowData.desc || "";
+    const usinaRaw = rowData.usina || "";
+    const objetoRaw = rowData.objeto || "";
     if (!usinaRaw && !idRealRaw && !descRaw) return;
 
-    const usinaKey = resolveUsinaKey(usinaRaw);
-    const mapping = USINAS[usinaKey];
+    const mapping = resolveProjectMapping(usinaRaw, rowData);
     if (!mapping) {
-      warnings.push(`Linha ${index + 1}: usina não reconhecida (${usinaRaw}).`);
+      warnings.push(
+        `Linha ${index + 1}: usina/mapeamento não reconhecido (${usinaRaw}).`
+      );
       return;
     }
 
-    const { prefix, centroCusto, lucro, localInstalacao, start } = mapping;
+    const {
+      usinaKey,
+      usinaDisplay,
+      prefix,
+      coletorBase,
+      centroCusto,
+      lucro,
+      localInstalacao,
+      start,
+    } = mapping;
     if (currentSeqByPrefix[prefix] == null) {
       currentSeqByPrefix[prefix] = start;
     }
@@ -433,15 +520,14 @@ function buildOutput(projectRows) {
 
     const seq = currentSeqByPrefix[prefix];
     currentSeqByPrefix[prefix] += 1;
-    const base = `NGHI.${prefix}.${padSeq(seq)}`;
-    const coletorBase = `NGHI.${prefix}`;
+    const base = `${coletorBase}.${padSeq(seq)}`;
     const idReal = (idRealRaw || "").trim();
     const desc = shortenText(descRaw || "");
     const denom403 = buildDenom403(idReal, objetoRaw || "");
-
-    const usinaDisplay = displayUsina(usinaKey);
+    const recalcKey = usinaKey || normalizeKey(usinaDisplay);
     projectsMeta.push({
       usinaKey,
+      recalcKey,
       usinaRaw: usinaDisplay,
       prefix,
       seq,
@@ -474,6 +560,7 @@ function buildOutput(projectRows) {
       "ENOR",
       dataInicio,
       dataFim,
+      "",
     ]);
     output.push([
       usinaDisplay,
@@ -495,6 +582,7 @@ function buildOutput(projectRows) {
       "ENOR",
       dataInicio,
       dataFim,
+      "",
     ]);
     output.push([
       usinaDisplay,
@@ -516,6 +604,7 @@ function buildOutput(projectRows) {
       "ENOR",
       dataInicio,
       dataFim,
+      `${base}.00001.003`,
     ]);
     output.push([
       usinaDisplay,
@@ -537,6 +626,7 @@ function buildOutput(projectRows) {
       "ENOR",
       dataInicio,
       dataFim,
+      `${base}.00001.003`,
     ]);
     output.push([
       usinaDisplay,
@@ -558,6 +648,7 @@ function buildOutput(projectRows) {
       "ENOR",
       dataInicio,
       dataFim,
+      "",
     ]);
   });
 
@@ -575,7 +666,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
     : meta;
   const output = [];
   ordered.forEach((item) => {
-    const base = `NGHI.${item.prefix}.${padSeq(item.seq)}`;
+    const base = `${item.coletorBase}.${padSeq(item.seq)}`;
     output.push([
       item.usinaRaw,
       item.coletorBase,
@@ -596,6 +687,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "ENOR",
       dataInicio,
       dataFim,
+      "",
     ]);
     output.push([
       item.usinaRaw,
@@ -617,6 +709,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "ENOR",
       dataInicio,
       dataFim,
+      "",
     ]);
     output.push([
       item.usinaRaw,
@@ -638,6 +731,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "ENOR",
       dataInicio,
       dataFim,
+      `${base}.00001.003`,
     ]);
     output.push([
       item.usinaRaw,
@@ -659,6 +753,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "ENOR",
       dataInicio,
       dataFim,
+      `${base}.00001.003`,
     ]);
     output.push([
       item.usinaRaw,
@@ -680,6 +775,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "ENOR",
       dataInicio,
       dataFim,
+      "",
     ]);
   });
   return output;
@@ -723,16 +819,21 @@ function renderOutputTable(rows, highlightBase = "") {
 }
 
 function collectManualRows() {
-  const row = [
-    manualColetor.value.trim(),
-    manualIdReal.value.trim(),
-    manualDesc.value.trim(),
-    manualUsina.value.trim(),
-    manualObjeto.value.trim(),
+  const usina = (manualUsinaCustom.value || manualUsina.value || "").trim();
+  if (!usina) return [];
+  return [
+    {
+      coletor: "",
+      idReal: manualIdReal.value.trim(),
+      desc: manualDesc.value.trim(),
+      usina,
+      objeto: manualObjeto.value.trim(),
+      customColetor: manualColetor.value.trim(),
+      customCentroCusto: manualCentroCusto.value.trim(),
+      customCentroLucro: manualCentroLucro.value.trim(),
+      customLocal: manualLocal.value.trim(),
+    },
   ];
-
-  if (!row[0] || !row[3]) return [];
-  return [row];
 }
 
 btnGenerate.addEventListener("click", () => {
@@ -752,7 +853,6 @@ btnGenerate.addEventListener("click", () => {
     const data = sapRows.slice(headerIndex + 1);
     const cols = headerInfo.cols || detectColumns(header);
     const missing = [];
-    if (cols.coletor === -1) missing.push("Coletor");
     if (cols.idReal === -1) missing.push("ID real");
     if (cols.desc === -1) missing.push("Descrição");
     if (cols.usina === -1) missing.push("Usina/Local");
@@ -765,16 +865,16 @@ btnGenerate.addEventListener("click", () => {
       if (warningsGenerate) warningsGenerate.textContent = "";
     }
     projectRows = data
-      .map((row) => [
-        cols.coletor >= 0 ? row[cols.coletor] || "" : "",
-        cols.idReal >= 0 ? row[cols.idReal] || "" : "",
-        cols.desc >= 0 ? row[cols.desc] || "" : "",
-        cols.usina >= 0 ? row[cols.usina] || "" : "",
-        cols.objeto >= 0 ? row[cols.objeto] || "" : "",
-      ])
+      .map((row) => ({
+        coletor: cols.coletor >= 0 ? row[cols.coletor] || "" : "",
+        idReal: cols.idReal >= 0 ? row[cols.idReal] || "" : "",
+        desc: cols.desc >= 0 ? row[cols.desc] || "" : "",
+        usina: cols.usina >= 0 ? row[cols.usina] || "" : "",
+        objeto: cols.objeto >= 0 ? row[cols.objeto] || "" : "",
+      }))
       .filter((row) => {
-        if (!row.some((cell) => cell && cell.trim())) return false;
-        if (!row[0] || !row[0].trim()) return false;
+        if (!Object.values(row).some((cell) => cell && String(cell).trim())) return false;
+        if (!row.usina || !row.usina.trim()) return false;
         return true;
       });
   }
@@ -788,6 +888,7 @@ btnGenerate.addEventListener("click", () => {
   window.__pepOutput = output;
   renderOutputTable(output);
   window.__pepMeta = projectsMeta;
+  populateRecalcUsina(projectsMeta);
   populatePepFilter(output);
 });
 
@@ -797,7 +898,7 @@ btnRecalc.addEventListener("click", () => {
   if (!window.__pepMeta || !usinaKey || !Number.isFinite(start)) return;
   let counter = start;
   window.__pepMeta.forEach((item) => {
-    if (item.usinaKey === usinaKey) {
+    if (item.recalcKey === usinaKey) {
       item.seq = counter;
       counter += 1;
     }
@@ -805,8 +906,8 @@ btnRecalc.addEventListener("click", () => {
   const updated = rebuildFromMeta(window.__pepMeta, usinaKey);
   const target = normalizeKey(recalcUsina.value || "");
   const sorted = updated.slice().sort((a, b) => {
-    const aMatch = resolveUsinaKey(a[0]) === target ? 0 : 1;
-    const bMatch = resolveUsinaKey(b[0]) === target ? 0 : 1;
+    const aMatch = normalizeKey(a[0] || "") === target ? 0 : 1;
+    const bMatch = normalizeKey(b[0] || "") === target ? 0 : 1;
     if (aMatch !== bMatch) return aMatch - bMatch;
     return 0;
   });
@@ -820,8 +921,8 @@ recalcUsina.addEventListener("change", () => {
   if (!target) return;
   const updated = rebuildFromMeta(window.__pepMeta);
   const sorted = updated.slice().sort((a, b) => {
-    const aMatch = resolveUsinaKey(a[0]) === target ? 0 : 1;
-    const bMatch = resolveUsinaKey(b[0]) === target ? 0 : 1;
+    const aMatch = normalizeKey(a[0] || "") === target ? 0 : 1;
+    const bMatch = normalizeKey(b[0] || "") === target ? 0 : 1;
     if (aMatch !== bMatch) return aMatch - bMatch;
     return 0;
   });
@@ -869,6 +970,23 @@ btnTemplatePep.addEventListener("click", () => {
 });
 
 renderOutputTable([]);
+
+function populateRecalcUsina(meta) {
+  const current = recalcUsina.value;
+  const options = Array.from(
+    new Set((meta || []).map((item) => item.usinaRaw).filter(Boolean))
+  ).sort();
+  recalcUsina.innerHTML = '<option value="">Selecione</option>';
+  options.forEach((usina) => {
+    const opt = document.createElement("option");
+    opt.value = usina;
+    opt.textContent = usina;
+    recalcUsina.appendChild(opt);
+  });
+  if (current && options.includes(current)) {
+    recalcUsina.value = current;
+  }
+}
 
 function populatePepFilter(rows) {
   const set = new Set(

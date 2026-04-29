@@ -122,6 +122,38 @@ body {
   grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr) minmax(360px, 1.4fr);
 }
 
+.advanced-grid {
+  margin-top: 14px;
+}
+
+.advanced-box {
+  margin-top: 16px;
+  border: 1px solid rgba(201, 214, 234, 0.9);
+  border-radius: 18px;
+  background: rgba(238, 244, 255, 0.46);
+  padding: 12px 14px 14px;
+}
+
+.advanced-box summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--accent-dark);
+  list-style: none;
+}
+
+.advanced-box summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced-box summary::after {
+  content: "Mostrar campos extras";
+  font-weight: 600;
+}
+
+.advanced-box[open] summary::after {
+  content: "Ocultar campos extras";
+}
+
 .manual-form label {
   display: flex;
   flex-direction: column;

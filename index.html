@@ -37,7 +37,7 @@
         <p class="hint">
           Cole a planilha com cabeçalho. O sistema identifica automaticamente:
           Coletor de Custo / Definição / PEP SIGEP, ID real (ou ID SIGEP),
-          Descrição/Denominação, Objeto/Especificação e Local/Usina.
+          Descrição/Denominação, Equipamento/Especificação e Local/Usina.
         </p>
         <textarea
           id="paste-sap"
@@ -63,14 +63,6 @@
               <option value="TUCURI">TUCURI</option>
             </select>
           </label>
-          <label>Coletor (Carga)
-            <input
-              id="manual-coletor"
-              class="form-control"
-              type="text"
-              placeholder="NGHI.0162.XX"
-            />
-          </label>
           <label>ID real
             <input
               id="manual-idreal"
@@ -87,15 +79,60 @@
               placeholder="Descrição do projeto"
             />
           </label>
-          <label>Objeto
+          <label>Equipamento
             <input
               id="manual-objeto"
               class="form-control"
               type="text"
-              placeholder="Objeto do CAPEX"
+              placeholder="Equipamento do CAPEX"
             />
           </label>
         </div>
+        <details class="advanced-box">
+          <summary>Opções avançadas</summary>
+          <div class="manual-form advanced-grid">
+            <label>Usina personalizada
+              <input
+                id="manual-usina-custom"
+                class="form-control"
+                type="text"
+                placeholder="Use se a usina nao estiver na lista"
+              />
+            </label>
+            <label>Coletor/NGHI manual
+              <input
+                id="manual-coletor"
+                class="form-control"
+                type="text"
+                placeholder="Ex.: NGHI.0161"
+              />
+            </label>
+            <label>Centro de custo
+              <input
+                id="manual-centro-custo"
+                class="form-control"
+                type="text"
+                placeholder="Ex.: NO10104003"
+              />
+            </label>
+            <label>Centro de lucro
+              <input
+                id="manual-centro-lucro"
+                class="form-control"
+                type="text"
+                placeholder="Ex.: N010104001"
+              />
+            </label>
+            <label>Local de instalação
+              <input
+                id="manual-local"
+                class="form-control"
+                type="text"
+                placeholder="Ex.: N-U-UHSU"
+              />
+            </label>
+          </div>
+        </details>
       </section>
 
       <section class="actions">

@@ -20,7 +20,7 @@ Aplicação 100% no navegador para gerar estruturas PEP com subníveis a partir 
 - **M**: Coletor de Custo  
 - **Q**: ID real  
 - **R**: Descrição do projeto  
-- **AG**: Objeto  
+- **AG**: Equipamento  
 - **AH**: Local/Usina  
 
 ## Saída (tabela final)
@@ -40,7 +40,7 @@ Aplicação 100% no navegador para gerar estruturas PEP com subníveis a partir 
 - Nível 2 e 3: descrição abreviada e limitada a 40 caracteres.
 - Nível 4.001: `ID real - CUSTO COMUM`
 - Nível 4.002: `ID real - SERVIÇO`
-- Nível 4.003: `ID real - OBJETO` (limitado a 40 caracteres)
+- Nível 4.003: `ID real - EQUIPAMENTO` (limitado a 40 caracteres)
 - Sequencial respeita o número inicial mínimo por usina.
 
 ## Mapeamento de usinas
