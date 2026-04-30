@@ -116,17 +116,30 @@ function normalizeKey(text) {
     .toUpperCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Z0-9]+/g, " ")
     .replace(/\s+/g, " ");
+}
+
+function compactKey(text) {
+  return normalizeKey(text).replace(/\s+/g, "");
 }
 
 function resolveUsinaKey(raw) {
   const key = normalizeKey(raw);
+  const compact = compactKey(raw);
   if (USINAS[key]) return key;
-  const candidates = Object.keys(USINAS);
-  const found = candidates.find((candidate) => key.includes(candidate));
-  if (found) return found;
-  if (key.includes("TUCURUI")) return "TUCURI";
-  return found || "";
+  const aliases = [
+    ["BALBINA", ["BALBINA", "UHEBALBINA", "UHBA"]],
+    ["COARACY NUNES", ["COARACYNUNES", "UHECOARACYNUNES", "UHCN"]],
+    ["CURUA-UNA", ["CURUAUNA", "UHECURUAUNA", "CURUA", "UHCU"]],
+    ["SAMUEL", ["SAMUEL", "UHESAMUEL", "UHSU"]],
+    ["TUCURI", ["TUCURI", "TUCURUI", "UHETUCURI", "UHETUCURUI", "UHTU"]],
+  ];
+
+  const found = aliases.find(([, values]) =>
+    values.some((alias) => compact.includes(alias))
+  );
+  return found ? found[0] : "";
 }
 
 function detectColumns(headerRow) {
