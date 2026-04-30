@@ -15,6 +15,7 @@ const recalcUsina = document.getElementById("recalc-usina");
 const recalcStart = document.getElementById("recalc-start");
 const manualUsina = document.getElementById("manual-usina");
 const manualUsinaCustom = document.getElementById("manual-usina-custom");
+const manualAdvanced = document.getElementById("manual-advanced");
 const manualColetor = document.getElementById("manual-coletor");
 const manualIdReal = document.getElementById("manual-idreal");
 const manualDesc = document.getElementById("manual-desc");
@@ -22,6 +23,8 @@ const manualObjeto = document.getElementById("manual-objeto");
 const manualCentroCusto = document.getElementById("manual-centro-custo");
 const manualCentroLucro = document.getElementById("manual-centro-lucro");
 const manualLocal = document.getElementById("manual-local");
+const manualPerfil = document.getElementById("manual-perfil");
+const manualEmpresa = document.getElementById("manual-empresa");
 
 // Mapeamento obrigatório por usina.
 const USINAS = {
@@ -101,6 +104,7 @@ const DATASETS = {
 
 const PEP_TEMPLATE_HEADERS = [
   "Usina",
+  "Coletor de custo (NGHI)",
   "ID real",
   "Descrição",
   "Equipamento/Especificação",
@@ -281,7 +285,7 @@ function formatSapDate(date) {
 
 function normalizeCollectorBase(raw) {
   const value = String(raw || "").trim().toUpperCase();
-  const match = value.match(/[A-Z]{3,12}\.\d+/);
+  const match = value.match(/[A-Z]{3,12}(?:\.\d+)+/);
   return match ? match[0] : value;
 }
 
@@ -289,6 +293,11 @@ function derivePrefixFromCollector(raw) {
   const base = normalizeCollectorBase(raw);
   const match = base.match(/[A-Z]{3,12}\.(\d+)/);
   return match ? match[1] : "";
+}
+
+function hasManualLevel2(raw) {
+  const base = normalizeCollectorBase(raw);
+  return /^[A-Z]{3,12}\.\d+\.\d+$/i.test(base);
 }
 
 // Converte texto colado do Excel em matriz de colunas fixas.
@@ -430,6 +439,7 @@ function resolveProjectMapping(usinaRaw, rowData = {}) {
     .filter(Boolean);
   const inferredNgHi =
     advancedValues.find((value) => /[A-Z]{3,12}\.\d+/i.test(value)) || "";
+  const manualLevel2 = inferredNgHi && hasManualLevel2(inferredNgHi);
 
   if (knownMapping) {
     return {
@@ -446,6 +456,7 @@ function resolveProjectMapping(usinaRaw, rowData = {}) {
       coletorBase: inferredNgHi
         ? normalizeCollectorBase(inferredNgHi)
         : `NGHI.${knownMapping.prefix}`,
+      manualLevel2,
     };
   }
 
@@ -460,6 +471,7 @@ function resolveProjectMapping(usinaRaw, rowData = {}) {
       localInstalacao: String(rowData.customLocal || "").trim().toUpperCase(),
       start: 1,
       coletorBase: normalizeCollectorBase(inferredNgHi),
+      manualLevel2,
     };
   }
 
@@ -470,8 +482,8 @@ function resolveProjectMapping(usinaRaw, rowData = {}) {
 function buildOutput(projectRows) {
   const warnings = [];
   const currentSeqByPrefix = {};
-  const dataInicio = formatSapDate(new Date());
-  const dataFim = "31.12.2030";
+  const defaultDataInicio = formatSapDate(new Date());
+  const defaultDataFim = "31.12.2030";
 
   const output = [];
   const projectsMeta = [];
@@ -510,6 +522,7 @@ function buildOutput(projectRows) {
       lucro,
       localInstalacao,
       start,
+      manualLevel2,
     } = mapping;
     if (currentSeqByPrefix[prefix] == null) {
       currentSeqByPrefix[prefix] = start;
@@ -519,12 +532,23 @@ function buildOutput(projectRows) {
     }
 
     const seq = currentSeqByPrefix[prefix];
-    currentSeqByPrefix[prefix] += 1;
-    const base = `${coletorBase}.${padSeq(seq)}`;
+    if (!manualLevel2) {
+      currentSeqByPrefix[prefix] += 1;
+    }
+    const base = manualLevel2 ? coletorBase : `${coletorBase}.${padSeq(seq)}`;
     const idReal = (idRealRaw || "").trim();
     const desc = shortenText(descRaw || "");
     const denom403 = buildDenom403(idReal, objetoRaw || "");
     const recalcKey = usinaKey || normalizeKey(usinaDisplay);
+    const perfil = String(rowData.customPerfil || "").trim().toUpperCase();
+    const tipo = "G6";
+    const areaContabil = "FCE1";
+    const empresa = String(rowData.customEmpresa || "ENOR").trim().toUpperCase();
+    const dataInicio = defaultDataInicio;
+    const dataFim = defaultDataFim;
+    const priTop = "7";
+    const priCusto = "3";
+    const priEquipamento = "2";
     projectsMeta.push({
       usinaKey,
       recalcKey,
@@ -538,6 +562,16 @@ function buildOutput(projectRows) {
       lucro,
       localInstalacao,
       denom403,
+      manualLevel2,
+      perfil,
+      tipo,
+      areaContabil,
+      empresa,
+      dataInicio,
+      dataFim,
+      priTop,
+      priCusto,
+      priEquipamento,
     });
 
     output.push([
@@ -548,16 +582,16 @@ function buildOutput(projectRows) {
       desc,
       "",
       "",
-      "7",
+      priTop,
       localInstalacao,
-      "",
+      perfil,
       idReal,
-      "G6",
+      tipo,
       centroCusto,
       lucro,
       coletorBase,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       "",
@@ -570,16 +604,16 @@ function buildOutput(projectRows) {
       desc,
       "",
       "",
-      "7",
+      priTop,
       localInstalacao,
-      "",
+      perfil,
       idReal,
-      "G6",
+      tipo,
       centroCusto,
       lucro,
       base,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       "",
@@ -592,16 +626,16 @@ function buildOutput(projectRows) {
       "CUSTO COMUM",
       "",
       "",
-      "3",
+      priCusto,
       localInstalacao,
-      "",
+      perfil,
       idReal,
-      "G6",
+      tipo,
       centroCusto,
       lucro,
       `${base}.00001`,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       `${base}.00001.003`,
@@ -614,16 +648,16 @@ function buildOutput(projectRows) {
       "SERVIÇO",
       "",
       "",
-      "3",
+      priCusto,
       localInstalacao,
-      "",
+      perfil,
       idReal,
-      "G6",
+      tipo,
       centroCusto,
       lucro,
       `${base}.00001`,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       `${base}.00001.003`,
@@ -636,16 +670,16 @@ function buildOutput(projectRows) {
       denom403,
       "",
       "",
-      "2",
+      priEquipamento,
       localInstalacao,
-      "",
+      perfil,
       idReal,
-      "G6",
+      tipo,
       centroCusto,
       lucro,
       `${base}.00001`,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       "",
@@ -656,8 +690,6 @@ function buildOutput(projectRows) {
 }
 
 function rebuildFromMeta(meta, prioritizeKey = "") {
-  const dataInicio = formatSapDate(new Date());
-  const dataFim = "31.12.2030";
   const ordered = prioritizeKey
     ? [
         ...meta.filter((item) => item.usinaKey === prioritizeKey),
@@ -666,7 +698,18 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
     : meta;
   const output = [];
   ordered.forEach((item) => {
-    const base = `${item.coletorBase}.${padSeq(item.seq)}`;
+    const base = item.manualLevel2
+      ? item.coletorBase
+      : `${item.coletorBase}.${padSeq(item.seq)}`;
+    const perfil = item.perfil || "";
+    const tipo = item.tipo || "G6";
+    const areaContabil = item.areaContabil || "FCE1";
+    const empresa = item.empresa || "ENOR";
+    const dataInicio = item.dataInicio || formatSapDate(new Date());
+    const dataFim = item.dataFim || "31.12.2030";
+    const priTop = item.priTop || "7";
+    const priCusto = item.priCusto || "3";
+    const priEquipamento = item.priEquipamento || "2";
     output.push([
       item.usinaRaw,
       item.coletorBase,
@@ -675,16 +718,16 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       item.desc,
       "",
       "",
-      "7",
+      priTop,
       item.localInstalacao,
-      "",
+      perfil,
       item.idReal,
-      "G6",
+      tipo,
       item.centroCusto,
       item.lucro,
       item.coletorBase,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       "",
@@ -697,16 +740,16 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       item.desc,
       "",
       "",
-      "7",
+      priTop,
       item.localInstalacao,
-      "",
+      perfil,
       item.idReal,
-      "G6",
+      tipo,
       item.centroCusto,
       item.lucro,
       base,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       "",
@@ -719,16 +762,16 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "CUSTO COMUM",
       "",
       "",
-      "3",
+      priCusto,
       item.localInstalacao,
-      "",
+      perfil,
       item.idReal,
-      "G6",
+      tipo,
       item.centroCusto,
       item.lucro,
       `${base}.00001`,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       `${base}.00001.003`,
@@ -741,16 +784,16 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "SERVIÇO",
       "",
       "",
-      "3",
+      priCusto,
       item.localInstalacao,
-      "",
+      perfil,
       item.idReal,
-      "G6",
+      tipo,
       item.centroCusto,
       item.lucro,
       `${base}.00001`,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       `${base}.00001.003`,
@@ -763,16 +806,16 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       item.denom403,
       "",
       "",
-      "2",
+      priEquipamento,
       item.localInstalacao,
-      "",
+      perfil,
       item.idReal,
-      "G6",
+      tipo,
       item.centroCusto,
       item.lucro,
       `${base}.00001`,
-      "FCE1",
-      "ENOR",
+      areaContabil,
+      empresa,
       dataInicio,
       dataFim,
       "",
@@ -819,7 +862,8 @@ function renderOutputTable(rows, highlightBase = "") {
 }
 
 function collectManualRows() {
-  const usina = (manualUsinaCustom.value || manualUsina.value || "").trim();
+  const customUsina = manualUsinaCustom.value.trim();
+  const usina = (customUsina || manualUsina.value).trim();
   if (!usina) return [];
   return [
     {
@@ -832,12 +876,59 @@ function collectManualRows() {
       customCentroCusto: manualCentroCusto.value.trim(),
       customCentroLucro: manualCentroLucro.value.trim(),
       customLocal: manualLocal.value.trim(),
+      customPerfil: manualPerfil.value.trim(),
+      customEmpresa: manualEmpresa.value.trim(),
     },
   ];
 }
 
+function validateManualInput() {
+  const customUsina = manualUsinaCustom.value.trim();
+  const selectedCustom = manualUsina.value === "__CUSTOM__";
+  const hasManualData = [
+    customUsina,
+    manualColetor.value,
+    manualIdReal.value,
+    manualDesc.value,
+    manualObjeto.value,
+    manualCentroCusto.value,
+    manualCentroLucro.value,
+    manualLocal.value,
+  ].some((value) => value.trim());
+
+  if (!hasManualData) return "";
+  if (!customUsina) {
+    if (selectedCustom) {
+      return "Informe o nome da usina personalizada nas opções avançadas.";
+    }
+    return "";
+  }
+  const coletor = manualColetor.value.trim();
+  if (!coletor) {
+    return "Para usina fora da lista, informe o Coletor de custo (NGHI) nas opções avançadas.";
+  }
+  if (!/^[A-Z]{3,12}\.\d+(?:\.\d+)?$/i.test(coletor)) {
+    return "Coletor de custo inválido. Use o formato NGHI.0161 ou NGHI.0161.01.";
+  }
+  return "";
+}
+
+manualUsina.addEventListener("change", () => {
+  const useCustomUsina = manualUsina.value === "__CUSTOM__";
+  if (manualAdvanced && useCustomUsina) {
+    manualAdvanced.open = true;
+    manualUsinaCustom.focus();
+  }
+});
+
 btnGenerate.addEventListener("click", () => {
   const sapRows = parseTsvAny(sapTextarea.value);
+  const manualValidation = validateManualInput();
+  if (manualValidation) {
+    warningsBox.textContent = manualValidation;
+    if (warningsGenerate) warningsGenerate.textContent = manualValidation;
+    return;
+  }
   const manualRows = collectManualRows();
   if (!sapRows.length && manualRows.length === 0) return;
   let projectRows = [];

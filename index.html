@@ -61,15 +61,8 @@
               <option value="CURUA-UNA">CURUA-UNA</option>
               <option value="SAMUEL">SAMUEL</option>
               <option value="TUCURI">TUCURI</option>
+              <option value="__CUSTOM__">OUTRA USINA</option>
             </select>
-          </label>
-          <label>ID real
-            <input
-              id="manual-idreal"
-              class="form-control"
-              type="text"
-              placeholder="COO.NO26.019"
-            />
           </label>
           <label>Descrição
             <input
@@ -88,7 +81,7 @@
             />
           </label>
         </div>
-        <details class="advanced-box">
+        <details id="manual-advanced" class="advanced-box">
           <summary>Opções avançadas</summary>
           <div class="manual-form advanced-grid">
             <label>Usina personalizada
@@ -99,12 +92,20 @@
                 placeholder="Use se a usina nao estiver na lista"
               />
             </label>
-            <label>Coletor/NGHI manual
+            <label>Coletor de custo (NGHI)
               <input
                 id="manual-coletor"
                 class="form-control"
                 type="text"
-                placeholder="Ex.: NGHI.0161"
+                placeholder="Opcional. Ex.: NGHI.0161"
+              />
+            </label>
+            <label>ID real
+              <input
+                id="manual-idreal"
+                class="form-control"
+                type="text"
+                placeholder="COO.NO26.019"
               />
             </label>
             <label>Centro de custo
@@ -129,6 +130,22 @@
                 class="form-control"
                 type="text"
                 placeholder="Ex.: N-U-UHSU"
+              />
+            </label>
+            <label>Perfil de investimento
+              <input
+                id="manual-perfil"
+                class="form-control"
+                type="text"
+                placeholder="Opcional"
+              />
+            </label>
+            <label>Empresa
+              <input
+                id="manual-empresa"
+                class="form-control"
+                type="text"
+                placeholder="Ex.: ENOR"
               />
             </label>
           </div>

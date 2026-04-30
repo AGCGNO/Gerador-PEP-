@@ -135,6 +135,9 @@ body {
 }
 
 .advanced-box summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   cursor: pointer;
   font-weight: 700;
   color: var(--accent-dark);
@@ -148,6 +151,7 @@ body {
 .advanced-box summary::after {
   content: "Mostrar campos extras";
   font-weight: 600;
+  color: var(--muted);
 }
 
 .advanced-box[open] summary::after {
