@@ -552,7 +552,7 @@ function buildOutput(projectRows) {
     const idReal = (idRealRaw || "").trim();
     const desc = shortenText(descRaw || "");
     const denom403 = buildDenom403(idReal, objetoRaw || "");
-    const recalcKey = usinaKey || normalizeKey(usinaDisplay);
+    const recalcKey = normalizeKey(usinaKey || usinaDisplay);
     const perfil = String(rowData.customPerfil || "").trim().toUpperCase();
     const tipo = "G6";
     const areaContabil = "FCE1";
@@ -705,8 +705,8 @@ function buildOutput(projectRows) {
 function rebuildFromMeta(meta, prioritizeKey = "") {
   const ordered = prioritizeKey
     ? [
-        ...meta.filter((item) => item.usinaKey === prioritizeKey),
-        ...meta.filter((item) => item.usinaKey !== prioritizeKey),
+        ...meta.filter((item) => item.recalcKey === prioritizeKey),
+        ...meta.filter((item) => item.recalcKey !== prioritizeKey),
       ]
     : meta;
   const output = [];
