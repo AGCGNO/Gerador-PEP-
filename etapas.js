@@ -505,14 +505,13 @@ function computeDeltaByMarco(rows, dateIndex, deltaIndex) {
     .filter(Boolean)
     .sort((a, b) => a - b);
   const firstFornec = fornecDates[0] || null;
-  const lastFornec = fornecDates[fornecDates.length - 1] || null;
 
   const contrato = dateOf("contrato");
   const aprovacao = dateOf("aprovacao");
   const emissao = dateOf("emissao");
   const termo = dateOf("termo");
   const levantamento = dateOf("levantamento");
-  const execucao = dateOf("execucao") || lastFornec;
+  const execucao = dateOf("execucao") || firstFornec;
   const conclusao = dateOf("conclusao");
   const encerramento = dateOf("encerramento");
 
@@ -525,7 +524,7 @@ function computeDeltaByMarco(rows, dateIndex, deltaIndex) {
     if (type === "emissao" && aprovacao && emissao) delta = diffDays(aprovacao, emissao);
     if (type === "termo" && emissao && termo) delta = diffDays(emissao, termo);
     if (type === "levantamento" && termo && levantamento) delta = diffDays(termo, levantamento);
-    if (type === "execucao" && lastFornec && execucao) delta = diffDays(execucao, lastFornec);
+    if (type === "execucao" && firstFornec && execucao) delta = diffDays(execucao, firstFornec);
     if (type === "conclusao" && execucao && conclusao) delta = diffDays(conclusao, execucao);
     if (type === "encerramento" && conclusao && encerramento) delta = diffDays(encerramento, conclusao);
     row[deltaIndex] = delta;
@@ -620,8 +619,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
     const groupInfo = projectGroup(total);
     const leadDays = leadDaysByValue(total);
 
-    const firstFornec = fornecimentoDates[0];
-    const lastFornec = fornecimentoDates[fornecimentoDates.length - 1];
+    let firstFornec = fornecimentoDates[0];
 
     const contratoDays = override?.contratoDays ?? 180;
     const emissaoDays = override?.emissaoDays ?? 15;
@@ -634,6 +632,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
         date: addDays(item.date, fornecOffset),
       }));
       fornecimentoDates = fornecimentoItems.map((m) => m.date);
+      firstFornec = fornecimentoDates[0];
     }
 
     const contrato = addDays(firstFornec, -contratoDays);
@@ -641,7 +640,7 @@ function buildEtapas(rows, header, overrides = {}, headerCols = null) {
     const emissao = addDays(aprovacao, -emissaoDays);
     const termo = addDays(emissao, -termoDays);
     const levantamento = addDays(termo, -30);
-    const execucao = lastFornec;
+    const execucao = firstFornec;
     const conclOffset = override?.conclOffset || 0;
     const encOffset = override?.encOffset || 0;
     const conclusao = addDays(addDays(execucao, 90), conclOffset);
@@ -768,9 +767,6 @@ function buildManualEtapas(items, overrides = {}) {
     const override = overrides[idProjClean] || {};
     const groupInfo = projectGroup(total);
     const leadDays = leadDaysByValue(total);
-    const firstFornec = fornecimentoItems.map((m) => m.date).sort((a, b) => a - b)[0];
-    const lastFornec = fornecimentoItems.map((m) => m.date).sort((a, b) => a - b).slice(-1)[0];
-
     const contratoDays = override.contratoDays ?? 180;
     const emissaoDays = override.emissaoDays ?? 15;
     const termoDays = override.termoDays ?? 30;
@@ -778,13 +774,15 @@ function buildManualEtapas(items, overrides = {}) {
     if (fornecOffset) {
       fornecimentoItems = fornecimentoItems.map((it) => ({ ...it, date: addDays(it.date, fornecOffset) }));
     }
+    const fornecimentoDates = fornecimentoItems.map((m) => m.date).sort((a, b) => a - b);
+    const firstFornec = fornecimentoDates[0];
 
     const contrato = addDays(firstFornec, -contratoDays);
     const aprovacao = addDays(contrato, -leadDays);
     const emissao = addDays(aprovacao, -emissaoDays);
     const termo = addDays(emissao, -termoDays);
     const levantamento = addDays(termo, -30);
-    const execucao = lastFornec;
+    const execucao = firstFornec;
     const conclOffset = override.conclOffset || 0;
     const encOffset = override.encOffset || 0;
     const conclusao = addDays(addDays(execucao, 90), conclOffset);
@@ -1130,12 +1128,11 @@ tableEtapas.addEventListener("focusout", (event) => {
       .filter(Boolean)
       .sort((a, b) => a - b);
     const firstFornec = fornecDates[0] || null;
-    const lastFornec = fornecDates[fornecDates.length - 1] || null;
     const contrato = findDate("contrato");
     const aprovacao = findDate("aprovacao");
     const emissao = findDate("emissao");
     const termo = findDate("termo");
-    const execucao = findDate("execucao") || lastFornec;
+    const execucao = findDate("execucao") || firstFornec;
     const conclusao = findDate("conclusao");
 
     let desiredDate = null;
@@ -1144,7 +1141,7 @@ tableEtapas.addEventListener("focusout", (event) => {
     if (type === "emissao" && aprovacao) desiredDate = addDays(aprovacao, -newDelta);
     if (type === "termo" && emissao) desiredDate = addDays(emissao, -newDelta);
     if (type === "levantamento" && termo) desiredDate = addDays(termo, -newDelta);
-    if (type === "execucao" && lastFornec) desiredDate = addDays(lastFornec, newDelta);
+    if (type === "execucao" && firstFornec) desiredDate = addDays(firstFornec, newDelta);
     if (type === "conclusao" && execucao) desiredDate = addDays(execucao, newDelta);
     if (type === "encerramento" && conclusao) desiredDate = addDays(conclusao, newDelta);
     if (!desiredDate) return;
