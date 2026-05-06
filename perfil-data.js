@@ -2278,3 +2278,121 @@ window.TUC_RULES = [
     "motivo": "software"
   }
 ];
+
+window.PROFILE_EXAMPLES = [
+  {
+    "termos": ["atualizacao dos servidores do spcs", "atualização dos servidores do spcs", "servidores spcs"],
+    "perfil": "485015",
+    "motivo": "exemplo manual: atualização dos servidores do SPCS"
+  },
+  {
+    "termos": ["aneis coletores", "anéis coletores"],
+    "perfil": "275015",
+    "motivo": "exemplo manual: anéis coletores de gerador"
+  },
+  {
+    "termos": ["sobressalentes estrategicos", "sobressalentes estratégicos"],
+    "perfil": "275015",
+    "motivo": "exemplo manual: sobressalentes estratégicos UHCN"
+  },
+  {
+    "termos": ["vertedouro"],
+    "perfil": "170013",
+    "motivo": "exemplo manual: revitalização de vertedouro"
+  },
+  {
+    "termos": ["sist de prot", "sistema de protecao", "sistema de proteção"],
+    "perfil": "485015",
+    "motivo": "exemplo manual: sistema de proteção"
+  },
+  {
+    "termos": ["ponte rolante", "ponte rolante e porticos", "ponte rolante e pórticos"],
+    "perfil": "315015",
+    "motivo": "exemplo manual: ponte rolante"
+  },
+  {
+    "termos": ["painel de comando"],
+    "perfil": "305015",
+    "motivo": "exemplo manual: painel de comando"
+  },
+  {
+    "termos": ["novo gde", "gde de 400kva", "gde 400kva"],
+    "perfil": "375015",
+    "motivo": "exemplo manual: GDE/sistema de alimentação de energia"
+  },
+  {
+    "termos": ["sist de superv", "sistema de supervisao", "sistema de supervisão"],
+    "perfil": "485035",
+    "motivo": "exemplo manual: sistema de supervisão"
+  },
+  {
+    "termos": ["subst de trafo", "substituicao de trafo", "substituição de trafo", "trafo"],
+    "perfil": "570015",
+    "motivo": "exemplo manual: transformador de força"
+  },
+  {
+    "termos": ["instrumentacao", "instrumentação"],
+    "perfil": "470015",
+    "motivo": "exemplo manual: instrumentação/monitoração"
+  },
+  {
+    "termos": ["cubiculo de 6 9kv", "cubículo de 6 9kv", "cubiculo 6 9kv", "cubículo 6 9kv"],
+    "perfil": "305015",
+    "motivo": "exemplo manual: cubículo"
+  },
+  {
+    "termos": ["mancais de guia da turb", "mancais de guia da turbina"],
+    "perfil": "595035",
+    "motivo": "exemplo manual: turbina hidráulica Kaplan"
+  },
+  {
+    "termos": ["sist de resfriamento", "sistema de resfriamento", "resfriamento das unidades", "resfriamento das uidades"],
+    "perfil": "515015",
+    "motivo": "exemplo manual: sistema de resfriamento"
+  },
+  {
+    "termos": ["subest 138kv", "subestacao 138kv", "subestação 138kv"],
+    "perfil": "545015",
+    "motivo": "exemplo manual: subestação unitária"
+  },
+  {
+    "termos": ["mesa de comando da sala", "mesa de comando da sala de c"],
+    "perfil": "485035",
+    "motivo": "exemplo manual: mesa de comando da sala de controle"
+  },
+  {
+    "termos": ["turb hidraulicas", "turb hidráulicas", "turbinas hidraulicas", "turbinas hidráulicas"],
+    "perfil": "595035",
+    "motivo": "exemplo manual: turbina hidráulica Kaplan"
+  },
+  {
+    "termos": ["servico auxiliar", "serviço auxiliar"],
+    "perfil": "305015",
+    "motivo": "exemplo manual: serviço auxiliar da usina"
+  },
+  {
+    "termos": ["cameras interna", "câmeras interna", "cameras interna e externa", "câmeras interna e externa"],
+    "perfil": "470015",
+    "motivo": "exemplo manual: monitoração da usina"
+  },
+  {
+    "termos": ["cadeias de isoladores", "cadeia de isoladores"],
+    "perfil": "190035",
+    "motivo": "exemplo manual: conjunto de cadeia de isoladores"
+  },
+  {
+    "termos": ["ger eletr", "gerador eletr", "geradores eletr"],
+    "perfil": "275015",
+    "motivo": "exemplo manual: gerador elétrico"
+  },
+  {
+    "termos": ["disjuntor"],
+    "perfil": "210015",
+    "motivo": "exemplo manual: disjuntor"
+  },
+  {
+    "termos": ["conjunto de tcs", "conjunto de tc", " tcs da lt ", " tcs "],
+    "perfil": "575015",
+    "motivo": "exemplo manual: transformador de medida"
+  }
+];

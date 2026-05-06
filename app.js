@@ -146,18 +146,57 @@ const STOP_WORDS = new Set([
   "USINA",
 ]);
 
-function tokenizeSearch(text) {
+const SEARCH_ABBREVIATIONS = {
+  AQ: ["AQUISICAO"],
+  AQUIS: ["AQUISICAO"],
+  AUTOM: ["AUTOMACAO"],
+  AUX: ["AUXILIAR"],
+  ELETR: ["ELETRICO", "ELETRICA"],
+  GER: ["GERADOR"],
+  IMPLANT: ["IMPLANTACAO"],
+  INST: ["INSTALACAO"],
+  MED: ["MEDICAO"],
+  MODERN: ["MODERNIZACAO"],
+  MODERNIZ: ["MODERNIZACAO"],
+  PROT: ["PROTECAO"],
+  RESFRI: ["RESFRIAMENTO"],
+  REVIT: ["REVITALIZACAO"],
+  SERV: ["SERVICO"],
+  SIST: ["SISTEMA"],
+  SUBEST: ["SUBESTACAO"],
+  SUBST: ["SUBSTITUICAO"],
+  SUPERV: ["SUPERVISAO", "SUPERVISORIO"],
+  TRAFO: ["TRANSFORMADOR"],
+  TURB: ["TURBINA"],
+  UNID: ["UNIDADE"],
+  UIDADES: ["UNIDADES"],
+};
+
+function normalizeSearchKey(text) {
   return normalizeKey(text)
+    .split(" ")
+    .flatMap((token) => [token, ...(SEARCH_ABBREVIATIONS[token] || [])])
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenizeSearch(text) {
+  return normalizeSearchKey(text)
     .split(" ")
     .filter((token) => token.length >= 3 && !STOP_WORDS.has(token));
 }
 
 function hasTerm(textKey, term) {
-  return textKey.includes(normalizeKey(term));
+  return textKey.includes(normalizeSearchKey(term));
 }
 
 function getProfilesByTuc(tuc) {
   return (window.PERFIL_INVESTIMENTO || []).filter((item) => item.tuc === tuc);
+}
+
+function getProfileByCode(code) {
+  return (window.PERFIL_INVESTIMENTO || []).find((item) => item.codigo === code);
 }
 
 function getTucTitle(tuc) {
@@ -202,17 +241,39 @@ function inferInvestmentProfile(rowData = {}) {
   }
 
   const source = [rowData.desc, rowData.objeto].filter(Boolean).join(" ");
-  const textKey = normalizeKey(source);
+  const textKey = normalizeSearchKey(source);
   const tokens = tokenizeSearch(source);
   if (!textKey || tokens.length === 0) {
     return { perfil: "", confidence: "none", candidates: [] };
   }
 
   const byTuc = new Map();
+  (window.PROFILE_EXAMPLES || []).forEach((example) => {
+    const matched = (example.termos || []).some((term) => hasTerm(textKey, term));
+    const profile = matched ? getProfileByCode(example.perfil) : null;
+    if (!profile) return;
+    const current = byTuc.get(profile.tuc) || {
+      tuc: profile.tuc,
+      score: 0,
+      motivos: [],
+      preferredProfiles: {},
+    };
+    current.score += 200;
+    current.motivos.push(example.motivo || profile.descricao);
+    current.preferredProfiles[profile.codigo] =
+      (current.preferredProfiles[profile.codigo] || 0) + 1;
+    byTuc.set(profile.tuc, current);
+  });
+
   (window.TUC_RULES || []).forEach((rule) => {
     const matched = (rule.termos || []).some((term) => hasTerm(textKey, term));
     if (!matched) return;
-    const current = byTuc.get(rule.tuc) || { tuc: rule.tuc, score: 0, motivos: [] };
+    const current = byTuc.get(rule.tuc) || {
+      tuc: rule.tuc,
+      score: 0,
+      motivos: [],
+      preferredProfiles: {},
+    };
     current.score += 100;
     current.motivos.push(rule.motivo);
     byTuc.set(rule.tuc, current);
@@ -229,6 +290,7 @@ function inferInvestmentProfile(rowData = {}) {
       tuc: tucRef.codigo,
       score: 0,
       motivos: [],
+      preferredProfiles: {},
     };
     current.score += score;
     current.motivos.push(tucRef.descricao);
@@ -247,6 +309,7 @@ function inferInvestmentProfile(rowData = {}) {
       tuc: profile.tuc,
       score: 0,
       motivos: [],
+      preferredProfiles: {},
     };
     current.score += score;
     current.motivos.push(profile.descricao);
@@ -257,12 +320,23 @@ function inferInvestmentProfile(rowData = {}) {
     .filter((item) => item.score >= 8)
     .map((item) => {
       const best = bestProfileForTuc(item.tuc, tokens);
+      const preferredCode = Object.entries(item.preferredProfiles || {}).sort(
+        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0])
+      )[0]?.[0];
+      const preferredProfile = preferredCode ? getProfileByCode(preferredCode) : null;
+      const profile = preferredProfile || best.profile;
+      const options = preferredProfile
+        ? [
+            preferredProfile,
+            ...best.options.filter((option) => option.codigo !== preferredProfile.codigo),
+          ]
+        : best.options;
       return {
         tuc: item.tuc,
         tucDescricao: getTucTitle(item.tuc),
-        perfil: best.profile ? best.profile.codigo : "",
-        perfilDescricao: best.profile ? best.profile.descricao : "",
-        opcoesPerfil: best.options,
+        perfil: profile ? profile.codigo : "",
+        perfilDescricao: profile ? profile.descricao : "",
+        opcoesPerfil: options,
         score: item.score,
         motivos: Array.from(new Set(item.motivos)).slice(0, 3),
       };
