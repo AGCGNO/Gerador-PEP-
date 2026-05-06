@@ -124,6 +124,169 @@ function compactKey(text) {
   return normalizeKey(text).replace(/\s+/g, "");
 }
 
+const STOP_WORDS = new Set([
+  "A",
+  "AS",
+  "COM",
+  "DA",
+  "DAS",
+  "DE",
+  "DO",
+  "DOS",
+  "E",
+  "EM",
+  "O",
+  "OS",
+  "OU",
+  "PARA",
+  "POR",
+  "SISTEMA",
+  "SIST",
+  "UHE",
+  "USINA",
+]);
+
+function tokenizeSearch(text) {
+  return normalizeKey(text)
+    .split(" ")
+    .filter((token) => token.length >= 3 && !STOP_WORDS.has(token));
+}
+
+function hasTerm(textKey, term) {
+  return textKey.includes(normalizeKey(term));
+}
+
+function getProfilesByTuc(tuc) {
+  return (window.PERFIL_INVESTIMENTO || []).filter((item) => item.tuc === tuc);
+}
+
+function getTucTitle(tuc) {
+  const found = (window.TUC_REFERENCES || []).find((item) => item.codigo === tuc);
+  return found ? found.descricao : "";
+}
+
+function scoreProfile(profile, tokens) {
+  const profileTokens = new Set(tokenizeSearch(profile.descricao));
+  return tokens.reduce((score, token) => score + (profileTokens.has(token) ? 2 : 0), 0);
+}
+
+function bestProfileForTuc(tuc, tokens) {
+  const profiles = getProfilesByTuc(tuc).filter(
+    (profile) => !profile.codigo.includes("PR") && !/CONVERS/i.test(profile.descricao)
+  );
+  if (!profiles.length) return { profile: null, options: [] };
+
+  const scored = profiles
+    .map((profile) => ({
+      profile,
+      score: scoreProfile(profile, tokens),
+    }))
+    .sort((a, b) => b.score - a.score || a.profile.codigo.localeCompare(b.profile.codigo));
+
+  const top = scored[0];
+  const tied = scored.filter((item) => item.score === top.score);
+  return {
+    profile: tied.length === 1 ? top.profile : null,
+    options: scored.slice(0, 5).map((item) => item.profile),
+  };
+}
+
+function inferInvestmentProfile(rowData = {}) {
+  const manualPerfil = String(rowData.customPerfil || "").trim().toUpperCase();
+  if (manualPerfil) {
+    return {
+      perfil: manualPerfil,
+      confidence: "manual",
+      candidates: [],
+    };
+  }
+
+  const source = [rowData.desc, rowData.objeto].filter(Boolean).join(" ");
+  const textKey = normalizeKey(source);
+  const tokens = tokenizeSearch(source);
+  if (!textKey || tokens.length === 0) {
+    return { perfil: "", confidence: "none", candidates: [] };
+  }
+
+  const byTuc = new Map();
+  (window.TUC_RULES || []).forEach((rule) => {
+    const matched = (rule.termos || []).some((term) => hasTerm(textKey, term));
+    if (!matched) return;
+    const current = byTuc.get(rule.tuc) || { tuc: rule.tuc, score: 0, motivos: [] };
+    current.score += 100;
+    current.motivos.push(rule.motivo);
+    byTuc.set(rule.tuc, current);
+  });
+
+  (window.TUC_REFERENCES || []).forEach((tucRef) => {
+    const titleTokens = new Set(tokenizeSearch(tucRef.descricao));
+    const score = tokens.reduce(
+      (total, token) => total + (titleTokens.has(token) ? 8 : 0),
+      0
+    );
+    if (!score) return;
+    const current = byTuc.get(tucRef.codigo) || {
+      tuc: tucRef.codigo,
+      score: 0,
+      motivos: [],
+    };
+    current.score += score;
+    current.motivos.push(tucRef.descricao);
+    byTuc.set(tucRef.codigo, current);
+  });
+
+  (window.PERFIL_INVESTIMENTO || []).forEach((profile) => {
+    if (profile.codigo.includes("PR") || /CONVERS/i.test(profile.descricao)) return;
+    const profileTokens = new Set(tokenizeSearch(profile.descricao));
+    const score = tokens.reduce(
+      (total, token) => total + (profileTokens.has(token) ? 5 : 0),
+      0
+    );
+    if (!score) return;
+    const current = byTuc.get(profile.tuc) || {
+      tuc: profile.tuc,
+      score: 0,
+      motivos: [],
+    };
+    current.score += score;
+    current.motivos.push(profile.descricao);
+    byTuc.set(profile.tuc, current);
+  });
+
+  const candidates = Array.from(byTuc.values())
+    .filter((item) => item.score >= 8)
+    .map((item) => {
+      const best = bestProfileForTuc(item.tuc, tokens);
+      return {
+        tuc: item.tuc,
+        tucDescricao: getTucTitle(item.tuc),
+        perfil: best.profile ? best.profile.codigo : "",
+        perfilDescricao: best.profile ? best.profile.descricao : "",
+        opcoesPerfil: best.options,
+        score: item.score,
+        motivos: Array.from(new Set(item.motivos)).slice(0, 3),
+      };
+    })
+    .sort((a, b) => b.score - a.score || a.tuc.localeCompare(b.tuc))
+    .slice(0, 6);
+
+  const top = candidates[0];
+  const second = candidates[1];
+  const uniqueTop = top && (!second || top.score >= second.score + 20);
+  return {
+    perfil: uniqueTop && top.perfil ? top.perfil : "",
+    confidence: uniqueTop && top.perfil ? "auto" : candidates.length ? "review" : "none",
+    candidates,
+  };
+}
+
+function formatProfileCandidate(candidate) {
+  const profileText = candidate.perfil
+    ? `${candidate.perfil} - ${candidate.perfilDescricao}`
+    : candidate.opcoesPerfil.map((item) => `${item.codigo} - ${item.descricao}`).join("; ");
+  return `TUC ${candidate.tuc} (${candidate.tucDescricao || "sem descrição"}): ${profileText}`;
+}
+
 function resolveUsinaKey(raw) {
   const key = normalizeKey(raw);
   const compact = compactKey(raw);
@@ -553,7 +716,22 @@ function buildOutput(projectRows) {
     const desc = shortenText(descRaw || "");
     const denom403 = buildDenom403(idReal, objetoRaw || "");
     const recalcKey = normalizeKey(usinaKey || usinaDisplay);
-    const perfil = String(rowData.customPerfil || "").trim().toUpperCase();
+    const profileInfo = inferInvestmentProfile(rowData);
+    const perfil = profileInfo.perfil;
+    if (profileInfo.confidence === "auto" && profileInfo.candidates[0]) {
+      warnings.push(
+        `Linha ${index + 1}: perfil ${perfil} sugerido por ${formatProfileCandidate(
+          profileInfo.candidates[0]
+        )}.`
+      );
+    } else if (profileInfo.confidence === "review") {
+      warnings.push(
+        `Linha ${index + 1}: perfil não preenchido automaticamente; confira ${profileInfo.candidates
+          .slice(0, 3)
+          .map(formatProfileCandidate)
+          .join(" | ")}.`
+      );
+    }
     const tipo = "G6";
     const areaContabil = "FCE1";
     const empresa = String(rowData.customEmpresa || "ENOR").trim().toUpperCase();
@@ -585,6 +763,7 @@ function buildOutput(projectRows) {
       priTop,
       priCusto,
       priEquipamento,
+      profileInfo,
     });
 
     output.push([
