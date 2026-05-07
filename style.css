@@ -171,6 +171,31 @@ body {
   display: block;
 }
 
+.required-mark,
+.optional-mark {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.required-mark {
+  color: #8a1f11;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.22);
+}
+
+.optional-mark {
+  color: #344054;
+  background: rgba(238, 244, 255, 0.86);
+  border: 1px solid rgba(201, 214, 234, 0.9);
+}
+
 .field-help {
   font-size: 0.78rem;
   color: #5b6c88;
@@ -494,6 +519,27 @@ td.locked {
   color: #5b6c88;
 }
 
+td.profile-missing {
+  background: rgba(244, 63, 94, 0.14);
+  color: #8a1f11;
+  outline: 2px solid rgba(244, 63, 94, 0.34);
+  outline-offset: -2px;
+}
+
+td.profile-review {
+  background: rgba(249, 181, 11, 0.22);
+  color: #7a4b00;
+  outline: 2px solid rgba(249, 181, 11, 0.46);
+  outline-offset: -2px;
+}
+
+td.profile-ok {
+  background: rgba(34, 197, 94, 0.14);
+  color: #166534;
+  outline: 2px solid rgba(34, 197, 94, 0.28);
+  outline-offset: -2px;
+}
+
 .warnings {
   margin-bottom: 10px;
   color: var(--accent-dark);
@@ -502,6 +548,7 @@ td.locked {
   border: 1px solid rgba(249, 181, 11, 0.28);
   border-radius: 12px;
   padding: 10px 12px;
+  white-space: pre-line;
 }
 
 .profile-results {

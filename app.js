@@ -26,6 +26,8 @@ const manualLocal = document.getElementById("manual-local");
 const manualPerfil = document.getElementById("manual-perfil");
 const manualEmpresa = document.getElementById("manual-empresa");
 
+const PEP_STORAGE_KEY = "pep_page_state_v1";
+
 // Mapeamento obrigatório por usina.
 const USINAS = {
   BALBINA: {
@@ -103,11 +105,12 @@ const DATASETS = {
 };
 
 const PEP_TEMPLATE_HEADERS = [
-  "Usina",
-  "Coletor de custo (NGHI)",
   "ID real",
   "Descrição",
+  "Local/Usina",
   "Equipamento/Especificação",
+  "Coletor de custo (NGHI)",
+  "Perfil de investimento (opcional)",
 ];
 
 function normalizeKey(text) {
@@ -127,6 +130,9 @@ function compactKey(text) {
 const STOP_WORDS = new Set([
   "A",
   "AS",
+  "AQ",
+  "AQUIS",
+  "AQUISICAO",
   "COM",
   "DA",
   "DAS",
@@ -150,8 +156,6 @@ const STOP_WORDS = new Set([
 ]);
 
 const SEARCH_ABBREVIATIONS = {
-  AQ: ["AQUISICAO"],
-  AQUIS: ["AQUISICAO"],
   AUTOM: ["AUTOMACAO"],
   AUX: ["AUXILIAR"],
   ELETR: ["ELETRICO", "ELETRICA"],
@@ -233,17 +237,7 @@ function bestProfileForTuc(tuc, tokens) {
   };
 }
 
-function inferInvestmentProfile(rowData = {}) {
-  const manualPerfil = String(rowData.customPerfil || "").trim().toUpperCase();
-  if (manualPerfil) {
-    return {
-      perfil: manualPerfil,
-      confidence: "manual",
-      candidates: [],
-    };
-  }
-
-  const source = [rowData.desc, rowData.objeto].filter(Boolean).join(" ");
+function inferInvestmentProfileFromText(source) {
   const textKey = normalizeSearchKey(source);
   const tokens = tokenizeSearch(source);
   if (!textKey || tokens.length === 0) {
@@ -387,11 +381,41 @@ function inferInvestmentProfile(rowData = {}) {
   const top = candidates[0];
   const second = candidates[1];
   const uniqueTop = top && (!second || top.score >= second.score + 20);
+  const likelyProfile = top
+    ? top.perfil || top.opcoesPerfil?.[0]?.codigo || ""
+    : "";
   return {
-    perfil: uniqueTop && top.perfil ? top.perfil : "",
+    perfil: uniqueTop && top.perfil ? top.perfil : likelyProfile,
     confidence: uniqueTop && top.perfil ? "auto" : candidates.length ? "review" : "none",
     candidates,
   };
+}
+
+function inferInvestmentProfile(rowData = {}) {
+  const manualPerfil = String(rowData.customPerfil || "").trim().toUpperCase();
+  if (manualPerfil) {
+    return {
+      perfil: manualPerfil,
+      confidence: "manual",
+      candidates: [],
+      source: "manual",
+    };
+  }
+
+  const attempts = [
+    ["equipamento", rowData.objeto],
+    ["descrição", rowData.desc],
+    ["descrição + equipamento", [rowData.desc, rowData.objeto].filter(Boolean).join(" ")],
+  ];
+
+  for (const [sourceName, text] of attempts) {
+    const result = inferInvestmentProfileFromText(text || "");
+    if (result.perfil || result.candidates.length) {
+      return { ...result, source: sourceName };
+    }
+  }
+
+  return { perfil: "", confidence: "none", candidates: [], source: "" };
 }
 
 function formatProfileCandidate(candidate) {
@@ -399,6 +423,40 @@ function formatProfileCandidate(candidate) {
     ? `${candidate.perfil} - ${candidate.perfilDescricao}`
     : candidate.opcoesPerfil.map((item) => `${item.codigo} - ${item.descricao}`).join("; ");
   return `TUC ${candidate.tuc} (${candidate.tucDescricao || "sem descrição"}): ${profileText}`;
+}
+
+function formatPepWarnings(warnings = []) {
+  const review = [];
+  const missing = [];
+  const other = [];
+
+  warnings.forEach((warning) => {
+    let match = warning.match(/^PEP ([^:]+): revisar perfil sugerido ([^.]+)\.$/);
+    if (match) {
+      review.push(`${match[1]} (${match[2]})`);
+      return;
+    }
+
+    match = warning.match(/^PEP ([^:]+): sem perfil de investimento\.$/);
+    if (match) {
+      missing.push(match[1]);
+      return;
+    }
+
+    other.push(warning);
+  });
+
+  const parts = [];
+  if (missing.length) {
+    parts.push(`Sem perfil (${missing.length}): ${missing.join(", ")}.`);
+  }
+  if (review.length) {
+    parts.push(`Revisar sugestão (${review.length}): ${review.join(", ")}.`);
+  }
+  if (other.length) {
+    parts.push(other.join(" "));
+  }
+  return parts.join("\n");
 }
 
 function resolveUsinaKey(raw) {
@@ -832,18 +890,13 @@ function buildOutput(projectRows) {
     const recalcKey = normalizeKey(usinaKey || usinaDisplay);
     const profileInfo = inferInvestmentProfile(rowData);
     const perfil = profileInfo.perfil;
-    if (profileInfo.confidence === "auto" && profileInfo.candidates[0]) {
+    if (profileInfo.confidence === "review") {
       warnings.push(
-        `Linha ${index + 1}: perfil ${perfil} sugerido por ${formatProfileCandidate(
-          profileInfo.candidates[0]
-        )}.`
+        `PEP ${base}.00001.003: revisar perfil sugerido ${perfil || "em branco"}.`
       );
-    } else if (profileInfo.confidence === "review") {
+    } else if (profileInfo.confidence === "none") {
       warnings.push(
-        `Linha ${index + 1}: perfil não preenchido automaticamente; confira ${profileInfo.candidates
-          .slice(0, 3)
-          .map(formatProfileCandidate)
-          .join(" | ")}.`
+        `PEP ${base}.00001.003: sem perfil de investimento.`
       );
     }
     const tipo = "G6";
@@ -890,7 +943,7 @@ function buildOutput(projectRows) {
       "",
       priTop,
       localInstalacao,
-      perfil,
+      "",
       idReal,
       tipo,
       centroCusto,
@@ -912,7 +965,7 @@ function buildOutput(projectRows) {
       "",
       priTop,
       localInstalacao,
-      perfil,
+      "",
       idReal,
       tipo,
       centroCusto,
@@ -934,7 +987,7 @@ function buildOutput(projectRows) {
       "",
       priCusto,
       localInstalacao,
-      perfil,
+      "",
       idReal,
       tipo,
       centroCusto,
@@ -956,7 +1009,7 @@ function buildOutput(projectRows) {
       "",
       priCusto,
       localInstalacao,
-      perfil,
+      "",
       idReal,
       tipo,
       centroCusto,
@@ -1026,7 +1079,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "",
       priTop,
       item.localInstalacao,
-      perfil,
+      "",
       item.idReal,
       tipo,
       item.centroCusto,
@@ -1048,7 +1101,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "",
       priTop,
       item.localInstalacao,
-      perfil,
+      "",
       item.idReal,
       tipo,
       item.centroCusto,
@@ -1070,7 +1123,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "",
       priCusto,
       item.localInstalacao,
-      perfil,
+      "",
       item.idReal,
       tipo,
       item.centroCusto,
@@ -1092,7 +1145,7 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
       "",
       priCusto,
       item.localInstalacao,
-      perfil,
+      "",
       item.idReal,
       tipo,
       item.centroCusto,
@@ -1130,6 +1183,24 @@ function rebuildFromMeta(meta, prioritizeKey = "") {
   return output;
 }
 
+function buildProfileStatusMap(meta = []) {
+  const status = {};
+  meta.forEach((item) => {
+    const base = item.manualLevel2
+      ? item.coletorBase
+      : `${item.coletorBase}.${padSeq(item.seq)}`;
+    const pep = `${base}.00001.003`;
+    if (!item.perfil) {
+      status[pep] = "missing";
+    } else if (item.profileInfo?.confidence === "review") {
+      status[pep] = "review";
+    } else {
+      status[pep] = "ok";
+    }
+  });
+  return status;
+}
+
 function renderOutputTable(rows, highlightBase = "") {
   if (!rows.length) {
     tableOutput.innerHTML = "<p class='hint'>Nada para exibir.</p>";
@@ -1153,10 +1224,23 @@ function renderOutputTable(rows, highlightBase = "") {
     if (highlightBase && row[3]?.startsWith(highlightBase)) {
       tr.classList.add("row-highlight");
     }
-    row.forEach((cell) => {
+    row.forEach((cell, index) => {
       const td = document.createElement("td");
       td.textContent = cell;
       td.setAttribute("contenteditable", "true");
+      const isProfileCell = OUTPUT_HEADERS[index] === "Perfil de Investimento";
+      const isEquipmentRow = row[2] === "4" && String(row[3] || "").endsWith(".003");
+      const profileStatus = window.__pepProfileStatus?.[row[3]];
+      if (isProfileCell && isEquipmentRow && profileStatus) {
+        td.classList.add(`profile-${profileStatus}`);
+        if (profileStatus === "missing") {
+          td.title = "Perfil de investimento não encontrado.";
+        } else if (profileStatus === "review") {
+          td.title = "Perfil sugerido para revisão.";
+        } else {
+          td.title = "Perfil de investimento encontrado.";
+        }
+      }
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
@@ -1165,6 +1249,115 @@ function renderOutputTable(rows, highlightBase = "") {
 
   tableOutput.innerHTML = "";
   tableOutput.appendChild(table);
+}
+
+function getPepFieldState() {
+  return {
+    sap: sapTextarea.value,
+    manualUsina: manualUsina.value,
+    manualUsinaCustom: manualUsinaCustom.value,
+    manualColetor: manualColetor.value,
+    manualIdReal: manualIdReal.value,
+    manualDesc: manualDesc.value,
+    manualObjeto: manualObjeto.value,
+    manualCentroCusto: manualCentroCusto.value,
+    manualCentroLucro: manualCentroLucro.value,
+    manualLocal: manualLocal.value,
+    manualPerfil: manualPerfil.value,
+    manualEmpresa: manualEmpresa.value,
+    manualAdvancedOpen: manualAdvanced.open,
+    recalcUsina: recalcUsina.value,
+    recalcStart: recalcStart.value,
+    filterPep: filterPep.value,
+  };
+}
+
+function applyPepFieldState(fields = {}) {
+  sapTextarea.value = fields.sap || "";
+  manualUsina.value = fields.manualUsina || "";
+  manualUsinaCustom.value = fields.manualUsinaCustom || "";
+  manualColetor.value = fields.manualColetor || "";
+  manualIdReal.value = fields.manualIdReal || "";
+  manualDesc.value = fields.manualDesc || "";
+  manualObjeto.value = fields.manualObjeto || "";
+  manualCentroCusto.value = fields.manualCentroCusto || "";
+  manualCentroLucro.value = fields.manualCentroLucro || "";
+  manualLocal.value = fields.manualLocal || "";
+  manualPerfil.value = fields.manualPerfil || "";
+  manualEmpresa.value = fields.manualEmpresa || "";
+  manualAdvanced.open = Boolean(fields.manualAdvancedOpen);
+  recalcStart.value = fields.recalcStart || recalcStart.value || "1";
+}
+
+function savePepState() {
+  const state = {
+    fields: getPepFieldState(),
+    output: window.__pepOutput || [],
+    meta: window.__pepMeta || [],
+    warnings: warningsBox.textContent || "",
+  };
+  localStorage.setItem(PEP_STORAGE_KEY, JSON.stringify(state));
+}
+
+function restorePepState() {
+  const raw = localStorage.getItem(PEP_STORAGE_KEY);
+  if (!raw) {
+    renderOutputTable([]);
+    return;
+  }
+
+  try {
+    const state = JSON.parse(raw);
+    applyPepFieldState(state.fields || {});
+    window.__pepOutput = Array.isArray(state.output) ? state.output : [];
+    window.__pepMeta = Array.isArray(state.meta) ? state.meta : [];
+    window.__pepProfileStatus = buildProfileStatusMap(window.__pepMeta);
+    warningsBox.textContent = state.warnings || "";
+    populateRecalcUsina(window.__pepMeta);
+    populatePepFilter(window.__pepOutput);
+
+    if (state.fields?.recalcUsina) recalcUsina.value = state.fields.recalcUsina;
+    if (state.fields?.filterPep) filterPep.value = state.fields.filterPep;
+
+    if (filterPep.value) {
+      const selected = window.__pepOutput.filter((r) => r[3]?.startsWith(filterPep.value));
+      const rest = window.__pepOutput.filter((r) => !r[3]?.startsWith(filterPep.value));
+      renderOutputTable([...selected, ...rest], filterPep.value);
+    } else {
+      renderOutputTable(window.__pepOutput);
+    }
+  } catch {
+    renderOutputTable([]);
+  }
+}
+
+function bindPepAutosave() {
+  [
+    sapTextarea,
+    manualUsina,
+    manualUsinaCustom,
+    manualColetor,
+    manualIdReal,
+    manualDesc,
+    manualObjeto,
+    manualCentroCusto,
+    manualCentroLucro,
+    manualLocal,
+    manualPerfil,
+    manualEmpresa,
+    recalcUsina,
+    recalcStart,
+    filterPep,
+  ].forEach((el) => {
+    el.addEventListener("input", savePepState);
+    el.addEventListener("change", savePepState);
+  });
+
+  manualAdvanced.addEventListener("toggle", savePepState);
+  tableOutput.addEventListener("input", () => {
+    window.__pepOutput = readTable(tableOutput, OUTPUT_HEADERS.length);
+    savePepState();
+  });
 }
 
 function collectManualRows() {
@@ -1190,9 +1383,11 @@ function collectManualRows() {
 
 function validateManualInput() {
   const customUsina = manualUsinaCustom.value.trim();
+  const usina = (customUsina || manualUsina.value).trim();
   const selectedCustom = manualUsina.value === "__CUSTOM__";
   const hasManualData = [
     customUsina,
+    manualUsina.value,
     manualColetor.value,
     manualIdReal.value,
     manualDesc.value,
@@ -1203,10 +1398,19 @@ function validateManualInput() {
   ].some((value) => value.trim());
 
   if (!hasManualData) return "";
-  if (!customUsina) {
-    if (selectedCustom) {
+  if (!usina || selectedCustom) {
+    if (selectedCustom && !customUsina) {
       return "Informe o nome da usina personalizada nas opções avançadas.";
     }
+    if (!usina) return "Informe a usina.";
+  }
+  if (!manualIdReal.value.trim()) {
+    return "Informe o ID real no cadastro manual.";
+  }
+  if (!manualDesc.value.trim()) {
+    return "Informe a descrição no cadastro manual.";
+  }
+  if (!customUsina) {
     return "";
   }
   const coletor = manualColetor.value.trim();
@@ -1278,13 +1482,15 @@ btnGenerate.addEventListener("click", () => {
 
   projectRows = [...projectRows, ...manualRows];
   const { output, warnings, projectsMeta } = buildOutput(projectRows);
-  warningsBox.textContent = warnings.length ? warnings.join(" ") : "";
+  warningsBox.textContent = formatPepWarnings(warnings);
   if (warningsGenerate) {
-    warningsGenerate.textContent = warnings.length ? warnings.join(" ") : "";
+    warningsGenerate.textContent = "";
   }
   window.__pepOutput = output;
-  renderOutputTable(output);
   window.__pepMeta = projectsMeta;
+  window.__pepProfileStatus = buildProfileStatusMap(projectsMeta);
+  renderOutputTable(output);
+  savePepState();
   populateRecalcUsina(projectsMeta);
   populatePepFilter(output);
 });
@@ -1309,7 +1515,9 @@ btnRecalc.addEventListener("click", () => {
     return 0;
   });
   window.__pepOutput = sorted;
+  window.__pepProfileStatus = buildProfileStatusMap(window.__pepMeta);
   renderOutputTable(sorted, filterPep.value);
+  savePepState();
 });
 
 recalcUsina.addEventListener("change", () => {
@@ -1324,7 +1532,9 @@ recalcUsina.addEventListener("change", () => {
     return 0;
   });
   window.__pepOutput = sorted;
+  window.__pepProfileStatus = buildProfileStatusMap(window.__pepMeta);
   renderOutputTable(sorted, filterPep.value);
+  savePepState();
 });
 
 btnCopy.addEventListener("click", async () => {
@@ -1339,6 +1549,7 @@ btnCopy.addEventListener("click", async () => {
   });
   const tsv = rows.map((row) => row.join("\t")).join("\n");
   await navigator.clipboard.writeText(tsv);
+  savePepState();
 });
 
 btnDownload.addEventListener("click", () => {
@@ -1356,17 +1567,37 @@ btnDownload.addEventListener("click", () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "PEPs");
   XLSX.writeFile(workbook, "peps.xlsx");
+  savePepState();
 });
 
 btnTemplatePep.addEventListener("click", () => {
-  const rows = [PEP_TEMPLATE_HEADERS];
+  const rows = [
+    PEP_TEMPLATE_HEADERS,
+    [
+      "COO.NO26.089",
+      "ATUALIZAÇÃO DOS SERVIDORES DO SPCS",
+      "BALBINA",
+      "Servidores do SPCS",
+      "",
+      "",
+    ],
+  ];
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
+  worksheet["!cols"] = [
+    { wch: 16 },
+    { wch: 44 },
+    { wch: 18 },
+    { wch: 34 },
+    { wch: 22 },
+    { wch: 28 },
+  ];
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo PEP");
-  XLSX.writeFile(workbook, "modelo_pep.xlsx");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo CAPEX PEP");
+  XLSX.writeFile(workbook, "modelo_capex_pep.xlsx");
 });
 
-renderOutputTable([]);
+bindPepAutosave();
+restorePepState();
 
 function populateRecalcUsina(meta) {
   const current = recalcUsina.value;
@@ -1404,15 +1635,14 @@ filterPep.addEventListener("change", () => {
   if (!window.__pepOutput) return;
   const base = filterPep.value;
   if (!base) {
+    window.__pepProfileStatus = buildProfileStatusMap(window.__pepMeta || []);
     renderOutputTable(window.__pepOutput);
+    savePepState();
     return;
   }
   const selected = window.__pepOutput.filter((r) => r[3]?.startsWith(base));
   const rest = window.__pepOutput.filter((r) => !r[3]?.startsWith(base));
+  window.__pepProfileStatus = buildProfileStatusMap(window.__pepMeta || []);
   renderOutputTable([...selected, ...rest], base);
+  savePepState();
 });
-
-const savedCapex = localStorage.getItem("capex_tsv");
-if (savedCapex && !sapTextarea.value) {
-  sapTextarea.value = savedCapex;
-}

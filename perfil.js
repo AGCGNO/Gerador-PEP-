@@ -9,6 +9,9 @@ const btnCopyProfile = document.getElementById("btn-copy-profile");
 const STOP_WORDS = new Set([
   "A",
   "AS",
+  "AQ",
+  "AQUIS",
+  "AQUISICAO",
   "COM",
   "DA",
   "DAS",
@@ -32,8 +35,6 @@ const STOP_WORDS = new Set([
 ]);
 
 const SEARCH_ABBREVIATIONS = {
-  AQ: ["AQUISICAO"],
-  AQUIS: ["AQUISICAO"],
   AUTOM: ["AUTOMACAO"],
   AUX: ["AUXILIAR"],
   ELETR: ["ELETRICO", "ELETRICA"],

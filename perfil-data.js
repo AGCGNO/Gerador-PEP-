@@ -2091,6 +2091,17 @@ window.TUC_REFERENCES = [
 window.TUC_RULES = [
   {
     "termos": [
+      "para raios",
+      "para-raios",
+      "pára-raios",
+      "pararraios",
+      "raios"
+    ],
+    "tuc": "310",
+    "motivo": "pára-raios"
+  },
+  {
+    "termos": [
       "stop log",
       "stoplogs",
       "stop-log",

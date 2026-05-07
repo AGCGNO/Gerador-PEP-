@@ -32,13 +32,14 @@
         <div class="section-head">
           <h2>Dados CAPEX (com cabeçalho)</h2>
           <button id="btn-template-pep" class="btn btn-secondary-soft" type="button">
-            Baixar planilha padrão
+            Modelo
           </button>
         </div>
         <p class="hint">
-          Cole a planilha com cabeçalho. O sistema identifica automaticamente:
-          Coletor de Custo / Definição / PEP SIGEP, ID real (ou ID SIGEP),
-          Descrição/Denominação, Equipamento/Especificação e Local/Usina.
+          Cole a planilha com cabeçalho. Obrigatórios: ID real, Descrição e
+          Local/Usina. Recomendado: Equipamento/Especificação, pois melhora a
+          identificação do perfil de investimento. O coletor NGHI é opcional
+          para usinas já mapeadas.
         </p>
         <textarea
           id="paste-sap"
@@ -54,7 +55,7 @@
           Preencha os campos abaixo e clique em gerar.
         </p>
         <div class="manual-form">
-          <label>Usina
+          <label><span class="field-title">Usina <span class="required-mark">obrigatório</span></span>
             <select id="manual-usina" class="form-select">
               <option value="">Selecione</option>
               <option value="BALBINA">BALBINA</option>
@@ -65,7 +66,7 @@
               <option value="__CUSTOM__">OUTRA USINA</option>
             </select>
           </label>
-          <label>Coletor de custo (NGHI)
+          <label><span class="field-title">Coletor de custo (NGHI) <span class="optional-mark">opcional</span></span>
             <input
               id="manual-coletor"
               class="form-control"
@@ -73,7 +74,7 @@
               placeholder="Opcional. Ex.: NGHI.0161"
             />
           </label>
-          <label>ID real
+          <label><span class="field-title">ID real <span class="required-mark">obrigatório</span></span>
             <input
               id="manual-idreal"
               class="form-control"
@@ -81,7 +82,7 @@
               placeholder="COO.NO26.019"
             />
           </label>
-          <label>Descrição
+          <label><span class="field-title">Descrição <span class="required-mark">obrigatório</span></span>
             <input
               id="manual-desc"
               class="form-control"
@@ -89,13 +90,22 @@
               placeholder="Descrição do projeto"
             />
           </label>
-          <label>Equipamento
+          <label><span class="field-title">Equipamento <span class="optional-mark">recomendado</span></span>
             <input
               id="manual-objeto"
               class="form-control"
               type="text"
               placeholder="Equipamento do CAPEX"
             />
+          </label>
+          <label><span class="field-title">Perfil de investimento <span class="optional-mark">opcional</span></span>
+            <input
+              id="manual-perfil"
+              class="form-control"
+              type="text"
+              placeholder="Opcional. Ex.: 485015"
+            />
+            <small class="field-help">Se ficar em branco, o sistema tenta sugerir e preenche apenas no equipamento .003.</small>
           </label>
         </div>
         <details id="manual-advanced" class="advanced-box">
@@ -131,14 +141,6 @@
                 class="form-control"
                 type="text"
                 placeholder="Ex.: N-U-UHSU"
-              />
-            </label>
-            <label>Perfil de investimento
-              <input
-                id="manual-perfil"
-                class="form-control"
-                type="text"
-                placeholder="Opcional"
               />
             </label>
             <label>Empresa
