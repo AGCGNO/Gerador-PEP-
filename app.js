@@ -8,6 +8,7 @@ const btnGenerate = document.getElementById("btn-generate");
 const btnCopy = document.getElementById("btn-copy");
 const btnDownload = document.getElementById("btn-download");
 const btnTemplatePep = document.getElementById("btn-template-pep");
+const btnClearPep = document.getElementById("btn-clear-pep");
 const btnRecalc = document.getElementById("btn-recalc");
 const filterPep = document.getElementById("filter-pep");
 
@@ -1360,6 +1361,21 @@ function bindPepAutosave() {
   });
 }
 
+function clearPepState() {
+  localStorage.removeItem(PEP_STORAGE_KEY);
+  applyPepFieldState({
+    recalcStart: "1",
+  });
+  warningsBox.textContent = "";
+  if (warningsGenerate) warningsGenerate.textContent = "";
+  window.__pepOutput = [];
+  window.__pepMeta = [];
+  window.__pepProfileStatus = {};
+  renderOutputTable([]);
+  populateRecalcUsina([]);
+  populatePepFilter([]);
+}
+
 function collectManualRows() {
   const customUsina = manualUsinaCustom.value.trim();
   const usina = (customUsina || manualUsina.value).trim();
@@ -1595,6 +1611,8 @@ btnTemplatePep.addEventListener("click", () => {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo CAPEX PEP");
   XLSX.writeFile(workbook, "modelo_capex_pep.xlsx");
 });
+
+btnClearPep.addEventListener("click", clearPepState);
 
 bindPepAutosave();
 restorePepState();

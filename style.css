@@ -168,7 +168,11 @@ body {
 }
 
 .field-title {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  white-space: nowrap;
 }
 
 .required-mark,
@@ -176,7 +180,7 @@ body {
   display: inline-flex;
   align-items: center;
   min-height: 22px;
-  margin-left: 6px;
+  margin-left: 0;
   padding: 2px 7px;
   border-radius: 999px;
   font-size: 0.72rem;

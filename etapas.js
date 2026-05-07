@@ -4,6 +4,7 @@ const btnApplyAdjust = document.getElementById("btn-apply-adjust");
 const btnCopy = document.getElementById("btn-copy-etapas");
 const btnDownload = document.getElementById("btn-download-etapas");
 const btnTemplateEtapas = document.getElementById("btn-template-etapas");
+const btnClearEtapas = document.getElementById("btn-clear-etapas");
 const tableEtapas = document.getElementById("table-etapas");
 const warnings = document.getElementById("warnings-etapas");
 const warningsGenerate = document.getElementById("warnings-etapas-generate");
@@ -22,6 +23,8 @@ const btnAddFornec = document.getElementById("btn-add-fornec");
 const manualFornecList = document.getElementById("manual-fornec-list");
 
 const filterId = document.getElementById("filter-id");
+
+const ETAPAS_STORAGE_KEY = "etapas_page_state_v1";
 
 const OUTPUT_HEADERS = [
   "ID Etapa",
@@ -477,6 +480,128 @@ function readTable(container) {
   return Array.from(table.querySelectorAll("tbody tr")).map((tr) =>
     Array.from(tr.querySelectorAll("td")).map((td) => td.textContent.trim())
   );
+}
+
+function getEtapasFieldState() {
+  return {
+    paste: pasteEtapas.value,
+    manualId: manualId.value,
+    manualTotal: manualTotal.value,
+    manualFornecs: Array.from(manualFornecList.querySelectorAll("input")).map(
+      (input) => input.value
+    ),
+    filterId: filterId.value,
+    adjustTotal: adjustTotal.value,
+    adjustContrato: adjustContrato.value,
+    adjustEmissao: adjustEmissao.value,
+    adjustTermo: adjustTermo.value,
+    adjustFornec: adjustFornec.value,
+    adjustConcl: adjustConcl.value,
+    adjustEnc: adjustEnc.value,
+  };
+}
+
+function applyEtapasFieldState(fields = {}) {
+  pasteEtapas.value = fields.paste || "";
+  manualId.value = fields.manualId || "";
+  manualTotal.value = fields.manualTotal || "";
+  manualFornecList.innerHTML = "";
+  const fornecs = Array.isArray(fields.manualFornecs) && fields.manualFornecs.length
+    ? fields.manualFornecs
+    : [""];
+  fornecs.forEach((value) => addFornecInput(value));
+  filterId.value = fields.filterId || "";
+  adjustTotal.value = fields.adjustTotal || "";
+  adjustContrato.value = fields.adjustContrato || "180";
+  adjustEmissao.value = fields.adjustEmissao || "15";
+  adjustTermo.value = fields.adjustTermo || "30";
+  adjustFornec.value = fields.adjustFornec || "0";
+  adjustConcl.value = fields.adjustConcl || "0";
+  adjustEnc.value = fields.adjustEnc || "0";
+  updateCurrencyHelp(manualTotal, manualTotalHelp);
+  updateCurrencyHelp(adjustTotal, adjustTotalHelp);
+}
+
+function saveEtapasState() {
+  const state = {
+    fields: getEtapasFieldState(),
+    rows: readTable(tableEtapas),
+    warnings: warnings.textContent || "",
+    header: window.__etapasHeader || null,
+    data: window.__etapasData || null,
+    cols: window.__etapasCols || null,
+    overrides: window.__etapasOverrides || {},
+  };
+  localStorage.setItem(ETAPAS_STORAGE_KEY, JSON.stringify(state));
+}
+
+function restoreEtapasState() {
+  const raw = localStorage.getItem(ETAPAS_STORAGE_KEY);
+  if (!raw) {
+    applyEtapasFieldState({});
+    renderTable(tableEtapas, []);
+    updateAdjustState();
+    return;
+  }
+
+  try {
+    const state = JSON.parse(raw);
+    window.__etapasHeader = state.header || null;
+    window.__etapasData = state.data || null;
+    window.__etapasCols = state.cols || null;
+    window.__etapasOverrides = state.overrides || {};
+    applyEtapasFieldState(state.fields || {});
+    const rows = Array.isArray(state.rows) ? state.rows : [];
+    populateFilter(rows);
+    if (state.fields?.filterId) filterId.value = state.fields.filterId;
+    warnings.textContent = state.warnings || "";
+    if (filterId.value) {
+      const filtered = rows.filter((r) => r[1] === filterId.value);
+      const rest = rows.filter((r) => r[1] !== filterId.value);
+      renderTable(tableEtapas, [...filtered, ...rest], filterId.value);
+    } else {
+      renderTable(tableEtapas, rows);
+    }
+    updateAdjustState();
+  } catch {
+    renderTable(tableEtapas, []);
+    updateAdjustState();
+  }
+}
+
+function bindEtapasAutosave() {
+  [
+    pasteEtapas,
+    manualId,
+    manualTotal,
+    filterId,
+    adjustTotal,
+    adjustContrato,
+    adjustEmissao,
+    adjustTermo,
+    adjustFornec,
+    adjustConcl,
+    adjustEnc,
+  ].forEach((el) => {
+    el.addEventListener("input", saveEtapasState);
+    el.addEventListener("change", saveEtapasState);
+  });
+  manualFornecList.addEventListener("input", saveEtapasState);
+  tableEtapas.addEventListener("input", saveEtapasState);
+}
+
+function clearEtapasState() {
+  localStorage.removeItem(ETAPAS_STORAGE_KEY);
+  window.__etapasHeader = null;
+  window.__etapasData = null;
+  window.__etapasCols = null;
+  window.__etapasOverrides = {};
+  applyEtapasFieldState({});
+  warnings.textContent = "";
+  if (warningsGenerate) warningsGenerate.textContent = "";
+  renderTable(tableEtapas, []);
+  populateFilter([]);
+  updateAdjustState();
 }
 
 function rowType(row) {
@@ -940,6 +1065,7 @@ btnPreview.addEventListener("click", () => {
   window.__etapasOverrides = window.__etapasOverrides || {};
   renderTable(tableEtapas, output);
   populateFilter(output);
+  saveEtapasState();
 });
 
 btnCopy.addEventListener("click", async () => {
@@ -954,6 +1080,7 @@ btnCopy.addEventListener("click", async () => {
   });
   const tsv = rows.map((row) => row.join("\t")).join("\n");
   await navigator.clipboard.writeText(tsv);
+  saveEtapasState();
 });
 
 btnDownload.addEventListener("click", () => {
@@ -971,6 +1098,7 @@ btnDownload.addEventListener("click", () => {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Etapas");
   XLSX.writeFile(workbook, "etapas.xlsx");
+  saveEtapasState();
 });
 
 btnTemplateEtapas.addEventListener("click", () => {
@@ -980,9 +1108,6 @@ btnTemplateEtapas.addEventListener("click", () => {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Modelo Etapas");
   XLSX.writeFile(workbook, "modelo_etapas.xlsx");
 });
-
-renderTable(tableEtapas, []);
-updateAdjustState();
 
 // Não pré-carregar conteúdo salvo para manter o campo em branco
 
@@ -995,15 +1120,17 @@ function addFornecInput(value = "") {
   input.placeholder = "26/03/2026";
   input.value = value;
   input.className = "form-control";
+  input.addEventListener("input", saveEtapasState);
+  input.addEventListener("change", saveEtapasState);
 
   wrapper.appendChild(input);
   manualFornecList.appendChild(wrapper);
 }
 
-btnAddFornec.addEventListener("click", () => addFornecInput());
-
-// cria um campo inicial
-addFornecInput();
+btnAddFornec.addEventListener("click", () => {
+  addFornecInput();
+  saveEtapasState();
+});
 bindCurrencyField(manualTotal, manualTotalHelp);
 bindCurrencyField(adjustTotal, adjustTotalHelp);
 
@@ -1029,11 +1156,13 @@ filterId.addEventListener("change", () => {
   updateAdjustState();
   if (!id) {
     renderTable(tableEtapas, rows);
+    saveEtapasState();
     return;
   }
   const filtered = rows.filter((r) => r[1] === id);
   const rest = rows.filter((r) => r[1] !== id);
   renderTable(tableEtapas, [...filtered, ...rest], id);
+  saveEtapasState();
 });
 
 function updateAdjustState() {
@@ -1070,6 +1199,7 @@ btnApplyAdjust.addEventListener("click", () => {
   const rest = output.filter((r) => r[1] !== id);
   renderTable(tableEtapas, [...filtered, ...rest], id);
   populateFilter(output);
+  saveEtapasState();
 });
 
 tableEtapas.addEventListener("focusin", (event) => {
@@ -1174,4 +1304,10 @@ tableEtapas.addEventListener("focusout", (event) => {
     const tds = tr.querySelectorAll("td");
     tds[deltaIndex].textContent = rowsData[idx][deltaIndex];
   });
+  saveEtapasState();
 });
+
+btnClearEtapas.addEventListener("click", clearEtapasState);
+
+bindEtapasAutosave();
+restoreEtapasState();
