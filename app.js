@@ -135,6 +135,9 @@ const STOP_WORDS = new Set([
   "DOS",
   "E",
   "EM",
+  "UM",
+  "UMA",
+  "CADA",
   "O",
   "OS",
   "OU",
@@ -226,7 +229,7 @@ function bestProfileForTuc(tuc, tokens) {
   const tied = scored.filter((item) => item.score === top.score);
   return {
     profile: tied.length === 1 ? top.profile : null,
-    options: scored.slice(0, 5).map((item) => item.profile),
+    options: scored.map((item) => item.profile),
   };
 }
 
@@ -297,6 +300,42 @@ function inferInvestmentProfile(rowData = {}) {
     byTuc.set(tucRef.codigo, current);
   });
 
+  (window.TUC_UAR || []).forEach((tucUar) => {
+    let score = 0;
+    const matches = [];
+    const tokenKey = tokens.join(" ");
+    (tucUar.itens || []).forEach((item) => {
+      const itemTokenList = tokenizeSearch(item);
+      const itemTokenKey = itemTokenList.join(" ");
+      const itemTokens = new Set(itemTokenList);
+      const overlap = tokens.filter((token) => itemTokens.has(token));
+      const phraseMatch =
+        itemTokenList.length > 1 && itemTokenKey && tokenKey.includes(itemTokenKey);
+      const shortExact =
+        itemTokens.size === 1 && overlap.length === 1 && textKey.includes(overlap[0]);
+      const usefulOverlap =
+        overlap.length >= 2 || overlap.some((token) => token.length >= 6);
+      if (!phraseMatch && !shortExact && !usefulOverlap) return;
+      score += phraseMatch ? 90 : Math.min(overlap.length * 18, 54);
+      matches.push(item);
+    });
+    if (!score) return;
+    const current = byTuc.get(tucUar.codigo) || {
+      tuc: tucUar.codigo,
+      score: 0,
+      motivos: [],
+      preferredProfiles: {},
+      uarMatches: [],
+    };
+    current.score += score;
+    current.motivos.push(`UAR MCPSE: ${matches.slice(0, 3).join("; ")}`);
+    current.uarMatches = [
+      ...(current.uarMatches || []),
+      ...matches.filter((item) => !(current.uarMatches || []).includes(item)),
+    ];
+    byTuc.set(tucUar.codigo, current);
+  });
+
   (window.PERFIL_INVESTIMENTO || []).forEach((profile) => {
     if (profile.codigo.includes("PR") || /CONVERS/i.test(profile.descricao)) return;
     const profileTokens = new Set(tokenizeSearch(profile.descricao));
@@ -339,6 +378,7 @@ function inferInvestmentProfile(rowData = {}) {
         opcoesPerfil: options,
         score: item.score,
         motivos: Array.from(new Set(item.motivos)).slice(0, 3),
+        uarMatches: (item.uarMatches || []).slice(0, 10),
       };
     })
     .sort((a, b) => b.score - a.score || a.tuc.localeCompare(b.tuc))

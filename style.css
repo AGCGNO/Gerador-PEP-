@@ -585,6 +585,91 @@ td.locked {
   font-size: 0.9rem;
 }
 
+.profile-uar,
+.profile-uar-details {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(201, 214, 234, 0.72);
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.profile-uar ul,
+.profile-uar-details ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.profile-uar li,
+.profile-uar-details li {
+  margin-bottom: 4px;
+}
+
+.profile-uar-details summary {
+  cursor: pointer;
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.sap-detail-toggle {
+  min-width: 74px;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 1px solid rgba(10, 0, 60, 0.14);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--accent-dark);
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.sap-detail-toggle:hover,
+.sap-detail-toggle:focus {
+  border-color: rgba(29, 78, 216, 0.32);
+  background: rgba(238, 244, 255, 0.9);
+}
+
+.sap-detail-row td {
+  background: #f8fbff;
+}
+
+.sap-detail-box {
+  padding: 16px;
+  border: 1px solid rgba(201, 214, 234, 0.9);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.sap-detail-head {
+  margin-bottom: 12px;
+}
+
+.sap-detail-head h3 {
+  margin: 0 0 10px;
+  color: var(--accent-dark);
+  font-size: 1rem;
+}
+
+.sap-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.sap-detail-panel {
+  min-width: 0;
+}
+
+.sap-detail-panel h4 {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .row-highlight td {
   background: rgba(0, 0, 255, 0.08);
 }
@@ -632,6 +717,10 @@ td.locked {
   }
 
   .manual-inline {
+    grid-template-columns: 1fr;
+  }
+
+  .sap-detail-grid {
     grid-template-columns: 1fr;
   }
 }

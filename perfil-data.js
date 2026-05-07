@@ -2076,7 +2076,7 @@ window.TUC_REFERENCES = [
   },
   {
     "codigo": "590",
-    "descricao": "TURBINA EÓLICA - PÁS"
+    "descricao": "TURBINA EÓLICA (AEROGERADOR)"
   },
   {
     "codigo": "613",
@@ -2276,6 +2276,1572 @@ window.TUC_RULES = [
     ],
     "tuc": "535",
     "motivo": "software"
+  }
+];
+
+window.TUC_UAR = [
+  {
+    "codigo": "100",
+    "descricao": "GASOSO",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de combustível líquido ou gasoso",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um aquecedor de combustível",
+      "Uma bomba para abastecimento de veículos",
+      "Uma unidade de purificação (filtro e centrífuga)",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um tanque",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema de combustível",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um separador água/óleo"
+    ]
+  },
+  {
+    "codigo": "105",
+    "descricao": "ARMAZENAGEM, MANIPULAÇÃO E TRANSPORTE DE COMBUSTÍVEL NUCLEAR",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de combustível nuclear",
+      "Um sistema de transferência de elemento combustível",
+      "Um \"rack\" de estocagem",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um redutor de velocidade",
+      "Um inversor de freqüência (variador de velocidade)"
+    ]
+  },
+  {
+    "codigo": "110",
+    "descricao": "ARMAZENAGEM, MANIPULAÇÃO E TRANSPORTE DE COMBUSTÍVEL SÓLIDO",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de combustível sólido",
+      "Um sistema de pulverização de carvão",
+      "Um sistema de dragagem de carvão",
+      "Um britador",
+      "Uma correia transportadora ou outro transportador",
+      "Um moinho",
+      "Um detetor ou separador",
+      "Um silo ou depósito",
+      "Um ventilador requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um variador de velocidade para motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma balança"
+    ]
+  },
+  {
+    "codigo": "112",
+    "descricao": "ARMAZENAGEM, MANIPULAÇÃO E TRANSPORTE DE RESÍDUO",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de resíduos",
+      "Um sistema pneumático ou hidráulico de remoção de resíduos",
+      "Um britador ou triturador",
+      "Uma correia transportadora (ou outro transportador)",
+      "Um silo ou depósito",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um ventilador requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um compressor",
+      "Um secador de ar de capacidade igual ou superior a 500 l",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um propulsor",
+      "Um tanque",
+      "Uma bacia de sedimentação",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um conjunto de todas as tubulações do sistema pneumático de remoção de resíduos",
+      "Um conjunto de todos os dutos do sistema hidráulico de remoção de resíduos",
+      "Um variador de velocidade para motor de potência igual ou superior a 7, 5 c.v.",
+      "Um redutor de velocidade",
+      "Um inversor de freqüência (variador de velocidade)"
+    ]
+  },
+  {
+    "codigo": "115",
+    "descricao": "ARMAZENAGEM, MANIPULAÇÃO E TRANSPORTE DE RESÍDUO NUCLEAR",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de resíduos nucleares",
+      "Um compressor de rejeitos",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Um tanque",
+      "Um recombinador de hidrogênio",
+      "Um evaporador de rejeitos",
+      "Um trocador de calor",
+      "Um compactador",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um redutor de velocidade",
+      "Um inversor de freqüência (variador de velocidade)"
+    ]
+  },
+  {
+    "codigo": "120",
+    "descricao": "BALANÇA PARA VEÍCULOS DE CARGA",
+    "itens": [
+      "Uma balança para veículos de carga"
+    ]
+  },
+  {
+    "codigo": "125",
+    "descricao": "BANCO DE CAPACITORES PARALELO",
+    "itens": [
+      "Um banco de capacitores",
+      "Um capacitor de filtro de corrente contínua´",
+      "Um conjunto de filtro de harmônicas (ativo ou passivo)",
+      "Um relé de controle",
+      "Um transformador de potencial capacitivo de classe de tensão superior a 6Kv",
+      "Uma unidade capacitiva",
+      "Um reator de amortecimento",
+      "Um transformador de corrente"
+    ]
+  },
+  {
+    "codigo": "130",
+    "descricao": "BANCO DE CAPACITORES SERIE",
+    "itens": [
+      "Um conjunto de barramento(s) de mesmo nível de classe de tensão",
+      "Um conjunto de barramento(s) de mesmo nível de classe de tensão isolado em SF6",
+      "Um conjunto de isoladores de pedestal de mesma classe de tensão",
+      "Um trecho de barramento de subestação entre duas estruturas",
+      "Uma bucha de passagem de classe de tensão igual ou superior a 34,5 kV",
+      "Um barramento e cabos isolados de saída do gerador até o transformador elevador",
+      "Um sistema de pressurização do barramento",
+      "Um isolador de pedestal de classe de tensão igual ou superior a 69 kV"
+    ]
+  },
+  {
+    "codigo": "135",
+    "descricao": "BARRAMENTO",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de combustível líquido ou gasoso",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um aquecedor de combustível",
+      "Uma bomba para abastecimento de veículos",
+      "Uma unidade de purificação (filtro e centrífuga)",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um tanque",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema de combustível",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um separador água/óleo"
+    ]
+  },
+  {
+    "codigo": "140",
+    "descricao": "CALDEIRA",
+    "itens": [
+      "Uma câmara",
+      "Uma galeria",
+      "Um túnel (galeria subterrânea)",
+      "Um sistema de drenagem"
+    ]
+  },
+  {
+    "codigo": "145",
+    "descricao": "CÂMARA E GALERIA",
+    "itens": [
+      "Uma câmara",
+      "Uma galeria",
+      "Um túnel (galeria subterrânea)",
+      "Um sistema de drenagem"
+    ]
+  },
+  {
+    "codigo": "150",
+    "descricao": "CANAL DE DESCARGA",
+    "itens": [
+      "Um canal de descarga",
+      "Uma bacia de descarga",
+      "Um trecho igual ou superior a 50 m de um canal de descarga",
+      "Um trecho igual ou superior a 50 m de um conduto de descarga",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150mm",
+      "Uma válvula não-motorizada de diâmetro igual ou superior a 450mm"
+    ]
+  },
+  {
+    "codigo": "155",
+    "descricao": "CHAMINÉ",
+    "itens": [
+      "Uma Chaminé",
+      "Um sistema de proteção contra descargas atmosféricas"
+    ]
+  },
+  {
+    "codigo": "160",
+    "descricao": "CHAVE",
+    "itens": [
+      "Uma chave"
+    ]
+  },
+  {
+    "codigo": "165",
+    "descricao": "COMPENSADOR DE REATIVOS",
+    "itens": [
+      "Um compensador de reativos (estáticos ou rotativos)",
+      "Um transformador ou um compensador de partida",
+      "Um conjunto de válvulas tiristorizadas",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma excitatriz",
+      "Um transformador de excitação",
+      "Um mancal",
+      "Um disjuntor de campo",
+      "Um disjuntor de banco",
+      "Um resistor de frenagem",
+      "Um reator limitador de corrente",
+      "Um regulador de tensão",
+      "Um polo do rotor",
+      "Um anel coletor"
+    ]
+  },
+  {
+    "codigo": "170",
+    "descricao": "COMPORTA",
+    "itens": [
+      "Uma comporta",
+      "Um painel ou \"stop-log\"",
+      "Um servomotor",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v",
+      "Uma viga pescadora",
+      "Corrente de transmissão mecânica",
+      "Cada engrenagem redutora",
+      "Pinhão",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Uma seção de conduto de descarga de fundo"
+    ]
+  },
+  {
+    "codigo": "175",
+    "descricao": "CONDENSADOR DE VAPOR",
+    "itens": [
+      "Um condensador",
+      "Um sistema de vácuo",
+      "Um ejetor ou bomba de vácuo",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um tanque",
+      "Um conjunto de todas as tubulações de um sistema de vácuo",
+      "Uma bomba de ar a jato de vapor",
+      "Um sistema de limpeza"
+    ]
+  },
+  {
+    "codigo": "180",
+    "descricao": "CONDUTO E CANALETA",
+    "itens": [
+      "Um conjunto de todos os condutos",
+      "Um conjunto de todas as canaletas",
+      "Um conjunto de condutos e canaletas integrados",
+      "Um trecho de conduto entre duas caixas de passagem",
+      "Um trecho de canaleta entre duas caixas de passagem",
+      "Uma caixa de manobra de 2 / 4 saídas em rede de distribuição subterrânea"
+    ]
+  },
+  {
+    "codigo": "185",
+    "descricao": "CONDUTO FORÇADO",
+    "itens": [
+      "Um conduto forçado de uma usina",
+      "Uma chaminé de equilíbrio",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Uma seção de conduto forçado"
+    ]
+  },
+  {
+    "codigo": "190",
+    "descricao": "CONDUTOR",
+    "itens": [
+      "Uma quantidade igual ou superior a um vão (cada fase) para todos os tipos de condutores. Considera- se um vão a distância entre duas estruturas, entre duas caixas de passagem e entre uma estrutura e o ponto de entrega ao consumidor (ramal de serviço).",
+      "um conjunto de cadeias de isoladores de mesma classe tensão, tipo, material e composição igual ou superior a 69 kV, em uma mesma estrutura.",
+      "Um conjunto de terminais desconectáveis de mesma classe de tensão e corrente em uma mesma ODI."
+    ]
+  },
+  {
+    "codigo": "195",
+    "descricao": "CONVERSOR DE CORRENTE",
+    "itens": [
+      "Um conversor de corrente",
+      "Um transformador conversor",
+      "Uma bucha isoladora de classe de tensão de 69kV ou 1000A",
+      "Um retificador",
+      "Uma válvula tiristorizada",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um inversor",
+      "Um pára-raios de classe de tensão igual ou superior a 34,5kV, quando integrante do conversor"
+    ]
+  },
+  {
+    "codigo": "200",
+    "descricao": "CONVERSOR DE FREQÜÊNCIA",
+    "itens": [
+      "Um conversor de freqüência",
+      "Um transformador conversor",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um gerador",
+      "Uma excitatriz",
+      "Uma válvula tiristorizada",
+      "Um pára-raios de classe de tensão igual ou superior a 34,5 kV, quando integrante do conversor",
+      "Um mancal de guia",
+      "Um acoplamento",
+      "Um eixo",
+      "Um núcleo do estator",
+      "Um núcleo do rotor",
+      "Um enrolamento do estator",
+      "Um conjunto de bobinas do rotor",
+      "Um polo do rotor"
+    ]
+  },
+  {
+    "codigo": "205",
+    "descricao": "DIREITO, MARCA E PATENTE",
+    "itens": [
+      "Um direito de propriedade ou de uso",
+      "Uma marca",
+      "Uma patente",
+      "Uma servidão"
+    ]
+  },
+  {
+    "codigo": "210",
+    "descricao": "DISJUNTOR",
+    "itens": [
+      "Um disjuntor",
+      "Um módulo seccionador SF6",
+      "Um pólo completo de disjuntor de classe de tensão igual ou superior a 69Kv",
+      "Um interruptor tripolar para câmara subterrânea",
+      "Um sistema de monitoramento",
+      "Uma câmara de extinção com ou sem SF6",
+      "Um relé de controle de disjuntor, quando integrante",
+      "Um disjuntor integrante de módulo SF6",
+      "Uma chave tripolar integrante de módulo SF6",
+      "Um transformador de medida (TC ou TP) quando integrante do Módulo SF6",
+      "Um pára-raios quando integrantes do Módulo SF6",
+      "Um mecanismo de acionamento",
+      "Um conjunto de resistores de pré-inserção (tensões iguais ou superior a 230 kV)",
+      "Um conjunto de capacitores de equalização (tensões iguais ou superior a 230 kV)",
+      "Uma cabeça de corte (módulo)",
+      "Um isolador de coluna",
+      "Uma bucha de classe de tensão igual ou superior a 69 kV ou 1000 A"
+    ]
+  },
+  {
+    "codigo": "215",
+    "descricao": "EDIFICAÇÃO",
+    "itens": [
+      "Um sistema de armazenagem, manipulação e transporte de combustível líquido ou gasoso",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um aquecedor de combustível",
+      "Uma bomba para abastecimento de veículos",
+      "Uma unidade de purificação (filtro e centrífuga)",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um tanque",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema de combustível",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um separador água/óleo"
+    ]
+  },
+  {
+    "codigo": "220",
+    "descricao": "ELEVADOR E TELEFÉRICO",
+    "itens": [
+      "Um elevador",
+      "Um teleférico",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma cabina de elevador",
+      "Um conjunto de cabos de sustentação",
+      "Uma caixa redutora",
+      "Um sistema de frenagem",
+      "Sistema de acionamento da porta"
+    ]
+  },
+  {
+    "codigo": "225",
+    "descricao": "ENVOLTÓRIO OU ESFERA DE CONTENÇÃO DO EDIFÍCIO DO REATOR",
+    "itens": [
+      "Uma esfera de contenção",
+      "Uma eclusa de pessoal",
+      "Uma eclusa de equipamento"
+    ]
+  },
+  {
+    "codigo": "230",
+    "descricao": "EQUIPAMENTO GERAL",
+    "itens": [
+      "Um equipamento geral"
+    ]
+  },
+  {
+    "codigo": "235",
+    "descricao": "EQUIPAMENTO GERAL DE INFORMÁTICA",
+    "itens": [
+      "Um equipamento de informática"
+    ]
+  },
+  {
+    "codigo": "240",
+    "descricao": "EQUIPAMENTOS DA TOMADA D'ÁGUA",
+    "itens": [
+      "Um conjunto de equipamentos de uma tomada d'água",
+      "Uma tela rotativa com ou sem sistema de limpeza",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um variador de velocidade (inversor de freqüência) para motor de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um conjunto de grades para detritos",
+      "Um rastelo limpa-grades"
+    ]
+  },
+  {
+    "codigo": "245",
+    "descricao": "EQUIPAMENTOS DO CICLO TÉRMICO",
+    "itens": [
+      "Um conjunto de equipamentos de um ciclo térmico",
+      "Um aquecedor de água de alimentação",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma turbina a vapor para acionamento de turbo-bomba",
+      "Um variador de velocidade (inversor de freqüência) para motor de potência igual ou superior a 7, 5 c.v.",
+      "Um filtro",
+      "Um tanque",
+      "Um desgaseificador",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema de vapor superaquecido",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema de reaquecimento de vapor",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema de água de alimentação e condensado",
+      "Um conjunto de todas as tubulações e todas as conexões de um sistema auxiliar de água de alimentação",
+      "Uma caixa redutora"
+    ]
+  },
+  {
+    "codigo": "250",
+    "descricao": "ESTRADA DE ACESSO",
+    "itens": [
+      "Uma estrada de acesso",
+      "Um trecho de estrada de rodagem",
+      "Um trecho de estrada de ferro",
+      "Uma pavimentação completa de um trecho de estrada, exceto recapeamento",
+      "Um sistema de proteção de encostas",
+      "Um conjunto de sinalização (horizontal ou vertical)",
+      "Uma ponte",
+      "Um viaduto",
+      "Um alargamento de uma estrada correspondente a uma faixa de tráfego, com qualquer comprimento"
+    ]
+  },
+  {
+    "codigo": "255",
+    "descricao": "ESTRUTURA (POSTE, TORRE)",
+    "itens": [
+      "Um poste",
+      "Uma torre",
+      "Uma defensa",
+      "Conjunto de proteção anti-corrosiva por corrente impressa para as torres de uma mesma ODI",
+      "Uma fundação de torre",
+      "Um sistema de sinalização noturna completo incluindo a fonte de energia em uma mesma ODI"
+    ]
+  },
+  {
+    "codigo": "260",
+    "descricao": "ESTRUTURA DA TOMADA D' ÁGUA",
+    "itens": [
+      "Um canal de adução",
+      "Uma estrutura da tomada de água",
+      "Um trecho igual ou superior a 100 m de um canal de adução"
+    ]
+  },
+  {
+    "codigo": "265",
+    "descricao": "ESTRUTURA SUPORTE DE EQUIPAMENTO E DE BARRAMENTO",
+    "itens": [
+      "Uma edificação",
+      "Uma parte de edifício que altere a área construída",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um reservatório de água, não integrante da edificação, com volume igual ou superior a 10 metros cúbicos",
+      "Um sistema de proteção contra descargas atmosféricas",
+      "Uma cobertura completa"
+    ]
+  },
+  {
+    "codigo": "270",
+    "descricao": "FIBRA ÓTICA",
+    "itens": [
+      "Uma extensão de fibra ótica entre duas estações de comunicação",
+      "Uma estrutura de sustentação"
+    ]
+  },
+  {
+    "codigo": "275",
+    "descricao": "GERADOR",
+    "itens": [
+      "Um gerador",
+      "Uma excitatriz (rotativa)",
+      "Um núcleo de estator ou núcleo de rotor",
+      "Um enrolamento de estator ou um conjunto de bobinas do rotor",
+      "Um conjunto de bobinas do rotor",
+      "Um mancal de guia ou mancal combinado guia/escora",
+      "Um módulo de tiristores",
+      "Um regulador de tensão, quando não integrante de painel",
+      "Um sistema de extração de vapor de óleo dos mancais",
+      "Um transformador de excitação, quando não integrante de painel ou cubículo",
+      "Um resistor de aterramento, quando não integrante de painel ou cubículo",
+      "Um pólo de rotor",
+      "Um transformador de corrente de classe de tensão igual ou superior a 6kV, quando integrante",
+      "Um transformador de potencial de classe de tensão igual ou superior a 6kV, quando integrante",
+      "Um sistema de frenagem e levantamento do rotor",
+      "Um trocador de calor, quando integrante",
+      "Um eixo",
+      "Um acoplamento",
+      "Um transformador de aterramento, quando não integrante de painel ou cubículo",
+      "Um conjunto de fechamento de neutro e terminais ou um anel coletot"
+    ]
+  },
+  {
+    "codigo": "280",
+    "descricao": "GERADOR DE VAPOR",
+    "itens": [
+      "Um gerador de vapor",
+      "Um sistema de purga do gerador",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um desmineralizador",
+      "Um tanque",
+      "Um trocador de calor",
+      "Um conjunto de toda a tubulação e todas as válvulas do sistema de purga do gerador",
+      "Um conjunto de filtros"
+    ]
+  },
+  {
+    "codigo": "285",
+    "descricao": "INSTALAÇÕES DE RECREAÇÃO E LAZER",
+    "itens": [
+      "Um conjunto de instalações de recreação e lazer de uma ODI",
+      "Um campo de esportes",
+      "Uma quadra de esportes",
+      "Uma piscina",
+      "Uma antena parabólica",
+      "Uma estrutura de sustentação para antena",
+      "Um \"playground\"",
+      "Um conjunto de todas as arquibancadas de uma mesma localização",
+      "Uma estação repetidora de TV",
+      "Uma sauna"
+    ]
+  },
+  {
+    "codigo": "290",
+    "descricao": "LUMINÁRIA",
+    "itens": [
+      "Uma luminária"
+    ]
+  },
+  {
+    "codigo": "295",
+    "descricao": "MEDIDOR",
+    "itens": [
+      "Um medidor",
+      "Um concentrador primário",
+      "Um concentrador secundário",
+      "Um módulo de medição criar",
+      "Um módulo de telecomunicação",
+      "Um módulo de display",
+      "Um módulo de corte-religa"
+    ]
+  },
+  {
+    "codigo": "300",
+    "descricao": "MOTOR DE COMBUSTÃO INTERNA",
+    "itens": [
+      "Um motor de combustão interna",
+      "Um sistema de partida",
+      "Um turbo alimentador (Charger)",
+      "Um tanque",
+      "Um regulador de velocidade",
+      "Um virabrequim para motor de potência igual ou superior a 500 c.v.",
+      "Um sistema de alimentação a gás para bicombustível"
+    ]
+  },
+  {
+    "codigo": "305",
+    "descricao": "PAINEL, MESA DE COMANDO E CUBÍCULO",
+    "itens": [
+      "Um painel",
+      "Uma mesa de comando",
+      "Um cubículo",
+      "Um painel, mesa de comando e cubículo interligados",
+      "Um bastidor",
+      "Um transformador de potencial para tensão superior a 6 kV",
+      "Um transformador de corrente para tensão superior a 6 kV",
+      "Uma chave seccionadora de classe de tensão igual ou superior a 15 kV",
+      "Um oscilógrafo",
+      "Um registrador digital",
+      "Um relé principal",
+      "Um regulador de tensão de potência igual ou superior a 10 kVA",
+      "Um transmissor e/ou receptor de telemedição com ou sem oscilador ou conversor"
+    ]
+  },
+  {
+    "codigo": "310",
+    "descricao": "PÁRA-RAIOS",
+    "itens": [
+      "Um pára-raios de classe de tensão igual ou superior a 34,5 kV",
+      "Um centelhador de classe de tensão igual ou superior a 34,5 kV"
+    ]
+  },
+  {
+    "codigo": "315",
+    "descricao": "PONTE ROLANTE, GUINDASTE OU PÓRTICO",
+    "itens": [
+      "Uma ponte rolante",
+      "Um pórtico",
+      "Um guindaste",
+      "Um \"derrick\"",
+      "Um guincho",
+      "Uma máquina limpa-grades",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um sistema de monotrilho",
+      "Uma torre de içamento",
+      "Uma talha com acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um variador de velocidade para motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma caixa redutora",
+      "O conjunto de cabos do guincho",
+      "Um conjunto de frenagem"
+    ]
+  },
+  {
+    "codigo": "320",
+    "descricao": "PRECIPITADOR DE RESÍDUOS",
+    "itens": [
+      "Um precipitador",
+      "Um transformador retificador",
+      "Um dessulfurizador",
+      "Um motor de potência igual ou superior a 7,5 cv",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 cv",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Uma bomba pneumática",
+      "Uma caixa redutora de potência igual ou superior a 7,5 cv",
+      "Um dosador",
+      "Uma balança",
+      "Um hidratador de cal virgem",
+      "Um soprador de potência igual ou superior a 7,5 cv",
+      "Um secador",
+      "Um silo ou tanque de cal"
+    ]
+  },
+  {
+    "codigo": "325",
+    "descricao": "PROTETOR DE REDE",
+    "itens": [
+      "Um protetor de rede",
+      "Relé do protetor de rede",
+      "Uma caixa de automação submersível"
+    ]
+  },
+  {
+    "codigo": "330",
+    "descricao": "REATOR (OU RESISTOR)",
+    "itens": [
+      "Um reator (ou resistor)",
+      "Um conjunto de radiadores",
+      "Um ventilador requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Uma bucha de classe de tensão igual ou superior a 15 kV ou 1000 A",
+      "Um sistema de monitoramento",
+      "Um resistor de aterramento",
+      "Um relé de gás"
+    ]
+  },
+  {
+    "codigo": "335",
+    "descricao": "REATOR NUCLEAR",
+    "itens": [
+      "Uma cabeça do vaso do reator",
+      "Um reator nuclear",
+      "Um mecanismo de acionamento das barras de controle"
+    ]
+  },
+  {
+    "codigo": "340",
+    "descricao": "REGULADOR DE TENSÃO",
+    "itens": [
+      "Um regulador de tensão",
+      "Um reforçador de linha",
+      "Um relé regulador de tensão",
+      "Um comutador sob carga",
+      "Um relé de gás",
+      "Um sistema de monitoramento",
+      "Um conjunto de radiadores",
+      "Um conjunto de ventiladores"
+    ]
+  },
+  {
+    "codigo": "345",
+    "descricao": "RELIGADOR",
+    "itens": [
+      "Um religador",
+      "Um relé controlador de religador",
+      "Uma câmara de extinção a vácuo"
+    ]
+  },
+  {
+    "codigo": "350",
+    "descricao": "RESERVATÓRIO, BARRAGEM E ADUTORA",
+    "itens": [
+      "Uma adutora",
+      "Uma barragem"
+    ]
+  },
+  {
+    "codigo": "355",
+    "descricao": "SISTEMA ANTI-RUÍDO",
+    "itens": [
+      "Um sistema anti-ruído",
+      "Uma cabina acústica",
+      "Um conjunto de atenuadores de ruído"
+    ]
+  },
+  {
+    "codigo": "360",
+    "descricao": "SISTEMA DE ABASTECIMENTO DE ÁGUA",
+    "itens": [
+      "Um sistema de abastecimento de água",
+      "Um poço artesiano",
+      "Uma cisterna",
+      "Um tanque",
+      "Um reservatório",
+      "Um clorador",
+      "Um floculador",
+      "Um alimentador químico",
+      "Um filtro para instalações de tubulação de diâmetro igual ou superior a 450mm",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5c.v.",
+      "Um motor de potência igual ou superior a 7,5c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um conjunto de todas as tubulações e conexões do sistema"
+    ]
+  },
+  {
+    "codigo": "365",
+    "descricao": "SISTEMA DE ÁGUA DE ALIMENTAÇÃO",
+    "itens": [
+      "Um sistema de água de alimentação",
+      "Um sistema de armazenamento",
+      "Um sistema de bombas de água de alimentação",
+      "Um sistema de pré-aquecedores de água de alimentação de alta pressão",
+      "Um sistema de partida e parada",
+      "Um sistema de água de alimentação de emergência",
+      "Um sistema de amostragem",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Um filtro",
+      "Um tanque",
+      "Um desgaseificador",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões do sistema principal",
+      "O conjunto de todas as tubulações e conexões do sistema auxiliar"
+    ]
+  },
+  {
+    "codigo": "370",
+    "descricao": "SISTEMA DE ÁGUA DE CIRCULAÇÃO",
+    "itens": [
+      "Um sistema de água de circulação",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5c.v.",
+      "Um trecho de conduto de água de circulação de extensão igual ou superior a 50 metros",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um tanque",
+      "Um difusor",
+      "Uma torre de resfriamento",
+      "Um ventilador requerendo acionador de potência igual ou maior que 7,5 cv"
+    ]
+  },
+  {
+    "codigo": "375",
+    "descricao": "SISTEMA DE ALIMENTAÇÃO DE ENERGIA",
+    "itens": [
+      "Um sistema de alimentação de energia",
+      "Um conjunto de banco de baterias, carregadores e inversores associados",
+      "Um gerador eólico",
+      "Um grupo motor-gerador",
+      "Um hidrogerador",
+      "Um banco de baterias",
+      "Um carregador de baterias",
+      "Um retificador",
+      "Um inversor",
+      "Um gerador",
+      "Uma turbina",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um \"no break\"",
+      "Uma unidade supervisora de corrente",
+      "Uma célula a combustível",
+      "Um painel/módulo solar",
+      "Um conversor",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v."
+    ]
+  },
+  {
+    "codigo": "380",
+    "descricao": "SISTEMA DE AMOSTRAGEM PRIMÁRIO",
+    "itens": [
+      "Um sistema de amostragem primário",
+      "Um trocador de calor",
+      "Um vaso de amostra"
+    ]
+  },
+  {
+    "codigo": "385",
+    "descricao": "SISTEMA DE AR COMPRIMIDO",
+    "itens": [
+      "Um sistema de ar comprimido",
+      "Um compressor de ar",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um tanque",
+      "Um secador de ar comprimido",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um conjunto de todas as tubulações de um sistema de ar comprimido",
+      "Um dispositivo de comando não integrante de painel",
+      "Uma válvula reguladora de pressão para sistema com pressão igual ou superior a 20 bar",
+      "Uma válvula de segurança para sistema com pressão igual ou superior a 20 bar",
+      "Um vaso de pressão"
+    ]
+  },
+  {
+    "codigo": "390",
+    "descricao": "SISTEMA DE AR E GASES DE COMBUSTÃO",
+    "itens": [
+      "Um sistema de ar e gases de combustão",
+      "Um aquecedor de ar regenerativo",
+      "Um aquecedor de ar tipo tubular",
+      "Um aquecedor de ar a vapor",
+      "Um ventilador requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um variador de velocidade para motor de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um conjunto de todos os dutos de gases de combustão de um sistema",
+      "Um conjunto de todos os dutos de ar de combustão de um sistema"
+    ]
+  },
+  {
+    "codigo": "395",
+    "descricao": "SISTEMA DE ATERRAMENTO",
+    "itens": [
+      "Um sistema de aterramento",
+      "Uma quantidade igual ou superior a um vão de cabo pára-raios com ou sem fibra ótica integrada para linhas de transmissão e para linhas e redes de distribuição",
+      "Uma quantidade igual ou superior a um vão de fios contrapeso de mesmo material para linhas de transmissão e para linhas e redes de distribuição",
+      "Um conjunto de esferas de sinalização para cada ODI",
+      "Uma base ou poste ou coluna suporte de cabo guarda.de subestações.",
+      "Uma quantidade igual ou superior a 50 kg de condutor nu ou 250 m isolado para usinas e SE."
+    ]
+  },
+  {
+    "codigo": "400",
+    "descricao": "SISTEMA DE COLETA DE ÓLEO ISOLANTE",
+    "itens": [
+      "Um sistema de coleta de óleo isolante",
+      "Um sistema de coleta de óleo lubrificante",
+      "Um sistema de coleta de óleo combustível",
+      "Um sistema de óleo de regulação",
+      "Uma caixa separadora",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões do sistema de cada sistema",
+      "Uma bacia coletora, quando não integrada à fundação do equipamento",
+      "Um filtro",
+      "Um reservatório",
+      "Um motor de potência igual ou superior a 7,5 cv",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 cv",
+      "Uma caixa redutora de potência igual ou superior a 7,5 cv"
+    ]
+  },
+  {
+    "codigo": "405",
+    "descricao": "SISTEMA DE COLETA E TRATAMENTO DE LIXO",
+    "itens": [
+      "Um sistema de coleta e tratamento de lixo",
+      "Um ejetor de ar para detritos",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões do sistema"
+    ]
+  },
+  {
+    "codigo": "410",
+    "descricao": "SISTEMA DE COMUNICAÇÃO E PROTEÇÃO CARRIER",
+    "itens": [
+      "Um conjunto de equipamentos de comunicação \"carrier\" de uma ODI",
+      "Um conjunto de equipamentos de proteção \"carrier\" de uma ODI",
+      "Um sistema de comunicação e proteção “carrier” de uma mesma ODI",
+      "Um receptor",
+      "Um transmissor",
+      "Um transceptor (em substituição dos dois transceptores abaixo)",
+      "Um capacitor de acoplamento",
+      "Um grupo de acoplamento",
+      "Uma bobina de bloqueio",
+      "Um modem",
+      "Um painel exclusivo",
+      "Uma mesa de comando exclusiva",
+      "Um quadro exclusivo",
+      "Um cubículo exclusivo ou compartilhado com transceptor de teleproteção"
+    ]
+  },
+  {
+    "codigo": "415",
+    "descricao": "SISTEMA DE COMUNICAÇÃO LOCAL",
+    "itens": [
+      "Um sistema telefônico local",
+      "Um sistema de intercomunicação e chamada",
+      "Uma central de comunicação",
+      "Uma estação de chamada",
+      "Um transformador de neutralização",
+      "Um poste",
+      "Uma central autocomutadora",
+      "Um distribuidor geral",
+      "Equipamento de tele-reunião"
+    ]
+  },
+  {
+    "codigo": "420",
+    "descricao": "SISTEMA DE CONDENSADO PARA PRODUÇÃO NUCLEAR",
+    "itens": [
+      "Um sistema de condensado",
+      "Um sistema de pré-aquecimento",
+      "Um sistema de injeção de água",
+      "Um sistema de drenos",
+      "Um sistema de enchimento de condensado",
+      "Um sistema de selagem condensado",
+      "Um sistema de amostragem",
+      "Uma turbina a vapor",
+      "Um aquecedor de água",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Um filtro",
+      "Um tanque",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "o conjunto de todas as tubulações e conexões"
+    ]
+  },
+  {
+    "codigo": "425",
+    "descricao": "SISTEMA DE CONTROLE QUÍMICO E VOLUMÉTRICO",
+    "itens": [
+      "Um sistema de controle químico e volumétrico",
+      "Um sistema de regeneração e reciclagem de boro",
+      "Um sistema de água de reposição do ciclo primário",
+      "Um trocador de calor",
+      "Um desmineralizador",
+      "Um evaporador",
+      "Um tanque",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um \"blender\"",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um conjunto de tubulação do sistema de controle químico e volumétrico",
+      "Um conjunto de tubulação do sistema de reciclagem e regeneração de boro",
+      "Um conjunto de tubulação do sistema de água de reposição do ciclo primário"
+    ]
+  },
+  {
+    "codigo": "430",
+    "descricao": "SISTEMA DE DADOS METEOROLÓGICOS, HIDROLÓGICOS E SISMOLÓGICOS",
+    "itens": [
+      "Uma estação de dados meteorológicos",
+      "Uma estação de dados hidrológicos",
+      "Uma estação de dados sismológicos",
+      "Um pluviômetro (sensor detector)",
+      "Um pluviógrafo (equipamento registrador)",
+      "Um anemômetro (sensor detector)",
+      "Um anemógrafo (equipamento registrador)",
+      "Um barômetro",
+      "Um tanque evaporimétrico",
+      "Um termômetro",
+      "Um psicrômetro",
+      "Um insolarímetro",
+      "Um radiômetro",
+      "Um linígrafo (equipamento registrador)",
+      "Um linímetro (sensor detector)",
+      "Um sismômetro (sensor detector)",
+      "Um sismógrafo (equipamento registrador)",
+      "Um modem",
+      "Uma sonda de nível",
+      "Uma bateria",
+      "Um painel / módulo solar"
+    ]
+  },
+  {
+    "codigo": "435",
+    "descricao": "SISTEMA DE DESCONTAMINAÇÃO PARA PRODUÇÃO NUCLEAR",
+    "itens": [
+      "Um sistema de descontaminação",
+      "Um sistema de descontaminação para componentes do circuito primário",
+      "Um sistema de lavanderia quente",
+      "Um agitador",
+      "Uma bacia de descontaminação",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Um tanque",
+      "Um filtro",
+      "Uma peneira",
+      "Um secador elétrico",
+      "Um boiler",
+      "Uma eclusa ou porta blindada",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões"
+    ]
+  },
+  {
+    "codigo": "440",
+    "descricao": "SISTEMA DE DOSAGEM QUÍMICA PARA PRODUÇÃO NUCLEAR",
+    "itens": [
+      "Um sistema de dosagem química",
+      "Um sistema de suprimento e distribuição de hidrazina",
+      "Um sistema de amostragem",
+      "Um agitador",
+      "Um tanque",
+      "Um filtro",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões"
+    ]
+  },
+  {
+    "codigo": "445",
+    "descricao": "SISTEMA DE DRENAGEM",
+    "itens": [
+      "Um sistema de drenagem",
+      "Um sistema de esgotamente e enchimento do tubo de sucção",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5c.v.",
+      "Um motor de potência igual ou superior a 7,5c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões do sistema",
+      "Um hidroejetor"
+    ]
+  },
+  {
+    "codigo": "450",
+    "descricao": "SISTEMA DE ESGOTO SANITÁRIO",
+    "itens": [
+      "Um sistema de esgoto sanitário",
+      "Uma fossa séptica com volume igual ou superior a 10m³",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5c.v.",
+      "Um motor de potência igual ou superior a 7,5c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "O conjunto de todas as tubulações e conexões do sistema",
+      "Uma estação de tratamento (inclusive compacta)",
+      "Um filtro anaeróbico",
+      "Um poço sumidouro",
+      "Um clorador"
+    ]
+  },
+  {
+    "codigo": "455",
+    "descricao": "SISTEMA DE EXAUSTÃO, VENTILAÇÃO E AR CONDICIONADO",
+    "itens": [
+      "Um sistema central de ar condicionado",
+      "Um sistema de ventilação",
+      "Um sistema de exaustão",
+      "Um condicionador de ar tipo compacto",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Uma torre de resfriamento",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um compressor requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um ventilador requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um exaustor requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Uma central de refrigeração (Água ou Ar)",
+      "Um exaustor eólico",
+      "Um despoluidor atmosférico",
+      "Um condensador não integrante do condicionador “self-contained”",
+      "Um evaporador",
+      "Um condensador",
+      "Um dispositivo de supervisão de refrigeração",
+      "Um damper corta-fogo"
+    ]
+  },
+  {
+    "codigo": "460",
+    "descricao": "SISTEMA DE ILUMINAÇÃO E FORÇA",
+    "itens": [
+      "Um sistema de iluminação e força",
+      "Um transformador de iluminação",
+      "Um poste",
+      "Uma luminária",
+      "Uma quantidade igual ou superior a um vão (cada fase) para todos os tipos de condutores elétricos",
+      "Um refletor"
+    ]
+  },
+  {
+    "codigo": "470",
+    "descricao": "SISTEMA DE MONITORAÇÃO DA USINA",
+    "itens": [
+      "Um sistema de monitoração",
+      "Um sistema de monitoração ambiental",
+      "Um sistema de monitoração de atividade",
+      "Um sistema de monitoração de vazamento",
+      "Um registrador",
+      "Um computador exclusivo",
+      "Um terminal de computador exclusivo",
+      "Uma unidade de terminal remota",
+      "Um transmissor e/ou receptor de telemedição",
+      "Um transmissor de dados",
+      "Um receptor de dados exclusivo",
+      "Um transceptor exclusivo",
+      "Uma mesa de comando exclusiva",
+      "Um painel de simulações e testes",
+      "Um painel oscilógrafo",
+      "Um painel registrador"
+    ]
+  },
+  {
+    "codigo": "480",
+    "descricao": "SISTEMA DE PROTEÇÃO CONTRA INCÊNDIO",
+    "itens": [
+      "Um sistema de proteção contra incêndio",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "O conjunto de todas as tubulações de um sistema de proteção contra incêndio",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um compressor requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um reservatório (Tanque)",
+      "Um variador de velocidade para motor de potência igual ou superior a 7, 5 c.v.",
+      "Cada conjunto de parede corta-fogo",
+      "Uma parede corta-fogo",
+      "O conjunto de cilindros de CO2 ou Halon, integrante de cada sistema",
+      "Sistema eletrônico de pesagem automática para cilindros de CO2 ou Halon"
+    ]
+  },
+  {
+    "codigo": "485",
+    "descricao": "SISTEMA DE PROTEÇÃO, MEDIÇÃO E AUTOMAÇÃO",
+    "itens": [
+      "Um transceptor Um sistema de telecontrole",
+      "Um sistema de telemedição",
+      "Um sistema de proteção",
+      "Um sistema de aquisição de dados e monitoramento",
+      "Um detector ou localizador de falta",
+      "Um oscilógrafo",
+      "Um registrador",
+      "Um transmissor de telemedição",
+      "Um receptor de telemedição",
+      "Uma unidade supervisora de alarme",
+      "Uma unidade de controle",
+      "Uma unidade de aquisição de dados",
+      "Uma unidade supervisora de alarme, de controle ou de aquisição de dados",
+      "Um microcomputador",
+      "Uma impressora"
+    ]
+  },
+  {
+    "codigo": "490",
+    "descricao": "SISTEMA DE PULVERIZAÇÃO DO ENVOLTÓRIO DE CONTENÇÃO",
+    "itens": [
+      "Um sistema de pulverização do envoltório de contenção",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um reservatório",
+      "Um compressor requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "O conjunto de toda a tubulação e todas as válvulas do sistema"
+    ]
+  },
+  {
+    "codigo": "495",
+    "descricao": "SISTEMA DE RADIOCOMUNICAÇÃO",
+    "itens": [
+      "Uma estação de comunicação de VHF, UHF, MICROONDAS ou fibra ótica",
+      "Um transmissor de rádio VHF, UHF, MICROONDAS e outros, com ou sem os respectivos acessórios",
+      "Um receptor de rádio VHF, UHF, MICROONDAS e outros, com ou sem os respectivos acessórios",
+      "Uma antena completa de VHF, UHF, MICROONDAS e outros, com respectivo cabo de descida",
+      "Uma torre",
+      "Uma antena parabólica de microondas",
+      "Uma unidade de controle remoto",
+      "Uma unidade de controle local",
+      "Um poste"
+    ]
+  },
+  {
+    "codigo": "500",
+    "descricao": "SISTEMA DE REFRIGERAÇÃO DE EMERGÊNCIA DO NÚCLEO DO REATOR",
+    "itens": [
+      "Um sistema de refrigeração de emergência do núcleo do reator",
+      "Um sistema de remoção de calor residual",
+      "Um sistema de injeção de segurança",
+      "Um acumulador",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um trocador de calor",
+      "Um conjunto de toda a tubulação de um sistema de remoção de calor residual",
+      "Um conjunto de toda a tubulação de um sistema de injeção de segurança",
+      "Um tanque",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm"
+    ]
+  },
+  {
+    "codigo": "505",
+    "descricao": "SISTEMA DE REFRIGERAÇÃO DO REATOR",
+    "itens": [
+      "Um conjunto de toda a tubulação do sistema",
+      "Um aquecedor elétrico",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Um pressurizador",
+      "Um sistema de refrigeração do reator",
+      "Um tanque",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Uma válvula de alívio",
+      "Uma válvula de segurança",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Um acumulador",
+      "Um filtro",
+      "Um resfriador"
+    ]
+  },
+  {
+    "codigo": "515",
+    "descricao": "SISTEMA DE RESFRIAMENTO DE EQUIPAMENTOS",
+    "itens": [
+      "Um sistema de resfriamento de equipamento",
+      "Um trocador de calor",
+      "Uma bomba ou um soprador requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um variador de velocidade para motor de potência igual ou superior a 7, 5 c.v.",
+      "Um ventilador requerendo acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Um tanque",
+      "Um conjunto de todos os condutos e acessórios",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Uma torre de resfriamento",
+      "Um sistema de resfriamento a óleo",
+      "Um filtro",
+      "Uma chave de fluxo",
+      "Um sistema de tratamento contra incrustrações ou um sistema de injeção de produtos químicos"
+    ]
+  },
+  {
+    "codigo": "520",
+    "descricao": "SISTEMA DE VAPOR PARA PRODUÇÃO NUCLEAR",
+    "itens": [
+      "Um sistema de vapor",
+      "Um sistema de vapor principal",
+      "Um sistema de vapor auxiliar",
+      "Um sistema de reaquecimento – parte quente",
+      "Um sistema de reaquecimento – parte fria",
+      "Um sistema de extração de vapor – alta pressão",
+      "Um sistema de extração de vapor – baixa pressão",
+      "Um sistema de amostragem",
+      "Uma turbina a vapor",
+      "Um aquecedor de água",
+      "Um variador de velocidade",
+      "Um filtro",
+      "Um tanque",
+      "Um desgaseificador",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um conjunto de todas as tubulações e conexões do sistema principal",
+      "Um conjunto de todas as tubulações e conexões do sistema auxiliar"
+    ]
+  },
+  {
+    "codigo": "525",
+    "descricao": "SISTEMA DE VIGILÂNCIA ELETRÔNICA",
+    "itens": [
+      "Um sistema de vigilância eletrônica",
+      "Um sistema de intercomunicação",
+      "Um computador exclusivo",
+      "Um terminal de computador exclusivo",
+      "Um circuito fechado de TV",
+      "Uma unidade de terminal remota",
+      "Um receptor de dados exclusivo",
+      "Um painel sinóptico",
+      "Um portal de detecção",
+      "Uma câmara de TV",
+      "Um conjunto de sensores",
+      "Um conjunto de detectores",
+      "Uma roleta eletrônica",
+      "Uma barreira eletrônica (cancela)",
+      "Uma cerca elétrica",
+      "Um transmissor de TV",
+      "Um receptor de TV",
+      "Um distribuidor ótico",
+      "Um CLP",
+      "Um enlace de fibra",
+      "Um sistema de Biometria"
+    ]
+  },
+  {
+    "codigo": "530",
+    "descricao": "SISTEMA PARA GASEIFICAÇÃO DE CARVÃO",
+    "itens": [
+      "Um ventilador com acionador de potência igual ou superior a 7,5 c.v.",
+      "Um variador de velocidade para motor de potência igual ou superior a 7,5 c.v.",
+      "Um compressor com acionador de potência igual ou superior a 7,5 c.v.",
+      "Uma instalação para produção de gás",
+      "Um gaseificador",
+      "Uma balança",
+      "Um tanque",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Uma central oleodinâmica com acionador de potência igual ou superior a 7,5 c.v.",
+      "Um sistema de suprimento GLP",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm"
+    ]
+  },
+  {
+    "codigo": "535",
+    "descricao": "SOFTWARE",
+    "itens": [
+      "Um software",
+      "Uma licença de uso de software",
+      "Uma evolução de versão ou implantação de novo módulo funcional em softwares dedicados, com valor mínimo de custo maior ou igual a 10% do valor do custo total inicial de implantação do software correspondente, e não inferior a R$5.000,00."
+    ]
+  },
+  {
+    "codigo": "540",
+    "descricao": "SUBESTAÇÃO SF6",
+    "itens": [
+      "Uma subestação SF6",
+      "Um disjuntor",
+      "Uma chave de classe de tensão igual ou superior a 15 kV",
+      "Um transformador de força",
+      "Um transformador de serviço auxiliar",
+      "Um transformador de potencial de classe de tensão superior a 6 kV",
+      "Um transformador de corrente de classe de tensão superior a 6 kV",
+      "Um barramento",
+      "Um dispositivo de acionamento de chave",
+      "Um dispositivo de acionamento de disjuntor",
+      "Um compressor",
+      "Um tanque",
+      "Um pára-raios de classe de tensão superior a 34,5 kV quando integrantes de módulo SF6",
+      "Um trecho de barramentos em SF6 entre duas estruturas ou dois equipamentos"
+    ]
+  },
+  {
+    "codigo": "545",
+    "descricao": "SUBESTAÇÃO UNITÁRIA",
+    "itens": [
+      "Uma subestação blindada",
+      "Um transformador de serviço auxiliar",
+      "Uma subestação móvel",
+      "Um transformador de força",
+      "Um transformador de potencial de classe de tensão superior a 6 kV",
+      "Um transformador de corrente de classe de tensão superior a 6 kV",
+      "Um disjuntor",
+      "Uma chave de classe de tensão igual ou superior a 15 kV",
+      "Um religador",
+      "Um pára-raios de classe de tensão superior a 34,5kV",
+      "Um sistema de alimentação de energia",
+      "Um gerador",
+      "Um painel, mesa de comando ou cubículo de uso exclusivo da subestação",
+      "Um sistema de proteção, medição e automação de uso exclusivo da subestação",
+      "Um sistema de ventilação, exaustão e ar condicionado de uso exclusivo da subestação",
+      "Um sistema de proteção contra incêndio de uso exclusivo da subestação",
+      "Um sistema de vigilância eletrônica de uso exclusivo da subestão"
+    ]
+  },
+  {
+    "codigo": "550",
+    "descricao": "SUPRIMENTO E TRATAMENTO D'ÁGUA",
+    "itens": [
+      "Um sistema de suprimento d'água",
+      "Um sistema de pré-tratamento",
+      "Um sistema de desmineralização",
+      "Um sistema de injeção química",
+      "Um clorador",
+      "Um desgaseificador"
+    ]
+  },
+  {
+    "codigo": "555",
+    "descricao": "TERRENO",
+    "itens": [
+      "Uma área de terreno"
+    ]
+  },
+  {
+    "codigo": "560",
+    "descricao": "TRANSFORMADOR DE ATERRAMENTO",
+    "itens": [
+      "Um transformador de aterramento",
+      "Um sistema de monitoramento",
+      "Um dispositivo de proteção",
+      "Um pára-raios de classe de tensão igual ou maior que 34,5 kV, quando integrante do transformador",
+      "Um conjunto de radiadores",
+      "Um conjunto de ventiladores",
+      "Um relé de gás"
+    ]
+  },
+  {
+    "codigo": "565",
+    "descricao": "TRANSFORMADOR DE DISTRIBUIÇÃO",
+    "itens": [
+      "Um transformador de distribuição"
+    ]
+  },
+  {
+    "codigo": "570",
+    "descricao": "TRANSFORMADOR DE FORÇA",
+    "itens": [
+      "Um transformador de força ou um auto-transformador",
+      "Um motor de potência igual ou superior a 7,5 c.v.",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 c.v.",
+      "Um comutador sob carga",
+      "Um conjunto de buchas de mesma classe de tensão igual ou superior a 15kV ou 1000",
+      "Um sistema de monitoramento",
+      "Um sistema de selagem/selamento",
+      "Um dispositivo de proteção",
+      "Um pára-raios de classe de tensão igual ou superior a 34,5 kV, quando integrante do transformador",
+      "Um relé regulador de tensão",
+      "Um tanque para transformadores de potência igual ou superior a 20 MVA",
+      "Um conjunto de radiadores para transformadores com potência inferior a 50 MVA",
+      "Um radiador para transformadores de potência igual ou superior a 50 MVA",
+      "Um comutador para transformador de classe de tensão igual ou superior a 69 kV",
+      "Um conjunto de trocadores de calor para transformadores com potência inferior a 50 MVA",
+      "Um trocador de calor para transformadores com potência igual ou superior a 50 MVA",
+      "Um sistema de filtragem de óleo do comutador",
+      "Uma caixa de controle"
+    ]
+  },
+  {
+    "codigo": "575",
+    "descricao": "TRANSFORMADOR DE MEDIDA",
+    "itens": [
+      "Um medidor",
+      "Um concentrador primário",
+      "Um concentrador secundário",
+      "Um módulo de medição criar",
+      "Um módulo de telecomunicação",
+      "Um módulo de display",
+      "Um módulo de corte-religa"
+    ]
+  },
+  {
+    "codigo": "580",
+    "descricao": "TRANSFORMADOR DE SERVIÇOS AUXILIARES",
+    "itens": [
+      "Um transformador de serviços auxiliares",
+      "Um sistema de monitoramento",
+      "Um dispositivo de proteção",
+      "Um comutador sob carga"
+    ]
+  },
+  {
+    "codigo": "585",
+    "descricao": "TURBINA A GÁS",
+    "itens": [
+      "Uma turbina a gás",
+      "Um rotor de turbina",
+      "Um rotor de compressor",
+      "Uma bomba com acionador de potência igual ou superior a 7, 5 c.v.",
+      "Um gerador de gás",
+      "Uma câmara de combustão",
+      "Um trocador de calor",
+      "Um motor ou compressor para partida com potência igual ou superior a 7, 5 c.v."
+    ]
+  },
+  {
+    "codigo": "590",
+    "descricao": "TURBINA EÓLICA (AEROGERADOR)",
+    "itens": [
+      "Uma turbina eólica",
+      "Um gerador elétrico",
+      "Uma torre",
+      "Uma nacela (cabine)",
+      "Um multiplicador de rotação (Gear Box)",
+      "Um disjuntor",
+      "Um rotor",
+      "Um estator",
+      "Um mancal de apoio",
+      "Um eixo principal",
+      "Uma pá da turbina",
+      "Um suporte das pás (Hub) da turbina",
+      "Um guincho",
+      "Um motor com potência igual ou superior a 7,5 c.v.",
+      "Um sistema de supervisão e controle",
+      "Um sistema de controle de direção do vento",
+      "Um sistema de controle de passo",
+      "Um sistema de freio"
+    ]
+  },
+  {
+    "codigo": "595",
+    "descricao": "TURBINA HIDRÁULICA",
+    "itens": [
+      "Uma turbina hidráulica",
+      "Um acoplamento ou conexão entre turbina e gerador ou eixo e rotor da turbina",
+      "Um regulador de velocidade",
+      "Um equipamento de partida e frenagem",
+      "Uma caixa espiral (caracol)",
+      "Um rotor",
+      "Um eixo",
+      "Um mancal de eixo de turbina",
+      "Um pré-distribuidor",
+      "Um distribuidor",
+      "Um sistema de vedação",
+      "Um servomotor",
+      "Um conjunto das palhetas móveis",
+      "Um tubo de sucção",
+      "Um sistema de drenagem da tampa da turbina",
+      "Um sistema de levantamento do rotor",
+      "Um mancal de guia de turbina"
+    ]
+  },
+  {
+    "codigo": "600",
+    "descricao": "TURBINA A VAPOR",
+    "itens": [
+      "Uma turbina a vapor",
+      "Um sistema de regulação de velocidade",
+      "Um servomotor",
+      "Um rotor de turbina",
+      "Uma válvula de parada de emergência",
+      "Um transformador de excitação",
+      "Uma válvula motorizada de diâmetro igual ou superior a 150 mm",
+      "Uma válvula não motorizada de diâmetro igual ou superior a 450 mm",
+      "Um motor de potência igual ou superior a 7, 5 c.v.",
+      "Uma bomba requerendo acionador de potência igual ou superior a 7,5 cv",
+      "Um trocador de calor",
+      "Uma caixa redutora de potência igual ou superior a 7,5 cv",
+      "Um condensador de vapor de selagem",
+      "Um mancal de deslizamento",
+      "Um mancal de escora"
+    ]
+  },
+  {
+    "codigo": "605",
+    "descricao": "UNIDADE DE GERAÇÃO SOLAR FOTOVOLTAICA",
+    "itens": [
+      "Um gerador solar fotovoltaico (painel solar)",
+      "Um módulo solar fotovoltaico",
+      "Um inversor",
+      "Um controlador de carga",
+      "Um banco de baterias",
+      "Um seguidor solar"
+    ]
+  },
+  {
+    "codigo": "610",
+    "descricao": "URBANIZAÇÃO E BENFEITORIAS",
+    "itens": [
+      "Um sistema de sinalização de aeroporto,",
+      "Um campo de pouso"
+    ]
+  },
+  {
+    "codigo": "615",
+    "descricao": "VEÍCULOS",
+    "itens": [
+      "Um equipamento geral"
+    ]
   }
 ];
 

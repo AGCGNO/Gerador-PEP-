@@ -17,6 +17,9 @@ const STOP_WORDS = new Set([
   "DOS",
   "E",
   "EM",
+  "UM",
+  "UMA",
+  "CADA",
   "O",
   "OS",
   "OU",
@@ -96,6 +99,16 @@ function getTucTitle(tuc) {
   return found ? found.descricao : "";
 }
 
+function getUarByTuc(tuc) {
+  return (window.TUC_UAR || []).find((item) => item.codigo === tuc);
+}
+
+function getTucProfiles(tuc) {
+  return getProfilesByTuc(tuc).filter(
+    (profile) => !profile.codigo.includes("PR") && !/CONVERS/i.test(profile.descricao)
+  );
+}
+
 function scoreProfile(profile, tokens) {
   const profileTokens = new Set(tokenizeSearch(profile.descricao));
   return tokens.reduce((score, token) => score + (profileTokens.has(token) ? 2 : 0), 0);
@@ -118,7 +131,7 @@ function bestProfileForTuc(tuc, tokens) {
   const tied = scored.filter((item) => item.score === top.score);
   return {
     profile: tied.length === 1 ? top.profile : null,
-    options: scored.slice(0, 6).map((item) => item.profile),
+    options: scored.map((item) => item.profile),
   };
 }
 
@@ -177,6 +190,42 @@ function inferInvestmentProfile(text) {
     byTuc.set(tucRef.codigo, current);
   });
 
+  (window.TUC_UAR || []).forEach((tucUar) => {
+    let score = 0;
+    const matches = [];
+    const tokenKey = tokens.join(" ");
+    (tucUar.itens || []).forEach((item) => {
+      const itemTokenList = tokenizeSearch(item);
+      const itemTokenKey = itemTokenList.join(" ");
+      const itemTokens = new Set(itemTokenList);
+      const overlap = tokens.filter((token) => itemTokens.has(token));
+      const phraseMatch =
+        itemTokenList.length > 1 && itemTokenKey && tokenKey.includes(itemTokenKey);
+      const shortExact =
+        itemTokens.size === 1 && overlap.length === 1 && textKey.includes(overlap[0]);
+      const usefulOverlap =
+        overlap.length >= 2 || overlap.some((token) => token.length >= 6);
+      if (!phraseMatch && !shortExact && !usefulOverlap) return;
+      score += phraseMatch ? 90 : Math.min(overlap.length * 18, 54);
+      matches.push(item);
+    });
+    if (!score) return;
+    const current = byTuc.get(tucUar.codigo) || {
+      tuc: tucUar.codigo,
+      score: 0,
+      motivos: [],
+      preferredProfiles: {},
+      uarMatches: [],
+    };
+    current.score += score;
+    current.motivos.push(`UAR MCPSE: ${matches.slice(0, 3).join("; ")}`);
+    current.uarMatches = [
+      ...(current.uarMatches || []),
+      ...matches.filter((item) => !(current.uarMatches || []).includes(item)),
+    ];
+    byTuc.set(tucUar.codigo, current);
+  });
+
   (window.PERFIL_INVESTIMENTO || []).forEach((profile) => {
     if (profile.codigo.includes("PR") || /CONVERS/i.test(profile.descricao)) return;
     const profileTokens = new Set(tokenizeSearch(profile.descricao));
@@ -219,10 +268,10 @@ function inferInvestmentProfile(text) {
         opcoesPerfil: options,
         score: item.score,
         motivos: Array.from(new Set(item.motivos)).slice(0, 3),
+        uarMatches: item.uarMatches || [],
       };
     })
-    .sort((a, b) => b.score - a.score || a.tuc.localeCompare(b.tuc))
-    .slice(0, 8);
+    .sort((a, b) => b.score - a.score || a.tuc.localeCompare(b.tuc));
 }
 
 function createEl(tag, className, text = "") {
@@ -288,6 +337,32 @@ function renderProfileResults() {
       card.appendChild(createEl("p", "profile-reason", `Indícios: ${candidate.motivos.join("; ")}`));
     }
 
+    if (candidate.uarMatches && candidate.uarMatches.length) {
+      const uarBox = createEl("div", "profile-uar");
+      uarBox.appendChild(createEl("strong", "", "Unidades de Adição e Retirada encontradas"));
+      const list = createEl("ul", "");
+      candidate.uarMatches.forEach((item) => {
+        const li = createEl("li", "", item);
+        list.appendChild(li);
+      });
+      uarBox.appendChild(list);
+      card.appendChild(uarBox);
+    }
+
+    const uar = getUarByTuc(candidate.tuc);
+    if (uar && uar.itens.length) {
+      const details = createEl("details", "profile-uar-details");
+      details.appendChild(
+        createEl("summary", "", `Ver todas as UAR da TUC ${candidate.tuc}`)
+      );
+      const list = createEl("ul", "");
+      uar.itens.forEach((item) => {
+        list.appendChild(createEl("li", "", item));
+      });
+      details.appendChild(list);
+      card.appendChild(details);
+    }
+
     profileResults.appendChild(card);
   });
 }
@@ -303,13 +378,12 @@ function renderSapResults() {
         normalizeKey(profile.descricao).includes(queryKey) ||
         normalizeKey(profile.tuc).includes(queryKey)
       );
-    })
-    .slice(0, 80);
+    });
 
   const table = document.createElement("table");
   const thead = document.createElement("thead");
   const headRow = document.createElement("tr");
-  ["Perfil", "TUC", "Descrição"].forEach((header) => {
+  ["Detalhes", "Perfil", "TUC", "Descrição"].forEach((header) => {
     const th = document.createElement("th");
     th.textContent = header;
     headRow.appendChild(th);
@@ -318,14 +392,80 @@ function renderSapResults() {
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
-  matches.forEach((profile) => {
+  matches.forEach((profile, index) => {
     const tr = document.createElement("tr");
+    const detailId = `sap-detail-${index}`;
+    const actionTd = document.createElement("td");
+    const btn = document.createElement("button");
+    btn.className = "sap-detail-toggle";
+    btn.type = "button";
+    btn.textContent = "Ver";
+    btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-controls", detailId);
+    actionTd.appendChild(btn);
+    tr.appendChild(actionTd);
+
     [profile.codigo, profile.tuc, profile.descricao].forEach((value) => {
       const td = document.createElement("td");
       td.textContent = value;
       tr.appendChild(td);
     });
     tbody.appendChild(tr);
+
+    const detailTr = document.createElement("tr");
+    detailTr.id = detailId;
+    detailTr.className = "sap-detail-row";
+    detailTr.hidden = true;
+    const detailTd = document.createElement("td");
+    detailTd.colSpan = 4;
+
+    const detailBox = createEl("div", "sap-detail-box");
+    const detailHead = createEl("div", "sap-detail-head");
+    detailHead.appendChild(
+      createEl("h3", "", `TUC ${profile.tuc} - ${getTucTitle(profile.tuc) || "Sem descrição"}`)
+    );
+    detailBox.appendChild(detailHead);
+
+    const detailGrid = createEl("div", "sap-detail-grid");
+    const profilePanel = createEl("div", "sap-detail-panel");
+    profilePanel.appendChild(createEl("h4", "", "Perfis SAP desta TUC"));
+
+    const profileList = createEl("div", "profile-options");
+    getTucProfiles(profile.tuc).forEach((item) => {
+      profileList.appendChild(
+        createEl("span", "profile-option", `${item.codigo} - ${item.descricao}`)
+      );
+    });
+    profilePanel.appendChild(profileList);
+    detailGrid.appendChild(profilePanel);
+
+    const uarPanel = createEl("div", "sap-detail-panel");
+    const uar = getUarByTuc(profile.tuc);
+    if (uar && uar.itens.length) {
+      const uarBox = createEl("div", "profile-uar");
+      uarBox.appendChild(createEl("strong", "", "Unidades de Adição e Retirada"));
+      const list = createEl("ul", "");
+      uar.itens.forEach((item) => list.appendChild(createEl("li", "", item)));
+      uarBox.appendChild(list);
+      uarPanel.appendChild(uarBox);
+    } else {
+      uarPanel.appendChild(
+        createEl("p", "hint", "Não há UAR extraída para esta TUC na base local.")
+      );
+    }
+    detailGrid.appendChild(uarPanel);
+    detailBox.appendChild(detailGrid);
+
+    detailTd.appendChild(detailBox);
+    detailTr.appendChild(detailTd);
+    tbody.appendChild(detailTr);
+
+    btn.addEventListener("click", () => {
+      const expanded = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!expanded));
+      btn.textContent = expanded ? "Ver" : "Fechar";
+      detailTr.hidden = expanded;
+    });
   });
   table.appendChild(tbody);
 
